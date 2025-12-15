@@ -14,9 +14,9 @@ import {
 import { ErrorObject } from './src/helpers/ErrorObject.js';
 import { getCacheStats } from './src/cache/cache.js';
 import { startup } from './src/utils/startup.js';
-import { fileURLToPath } from 'url';
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3002;
+
 const parseAllowedOrigins = (allowedOrigins) => {
     if (!allowedOrigins) return [];
     const stripped = allowedOrigins.trim().replace(/^\[|\]$/g, '');
@@ -25,7 +25,7 @@ const parseAllowedOrigins = (allowedOrigins) => {
         .map((s) => s.trim().replace(/^\"|\"$|^\'|\'$/g, ''))
         .filter(Boolean);
 };
-// localhost is also allowed. (from any localhost port)
+
 const allowedOrigins = parseAllowedOrigins(process.env.ALLOWED_ORIGINS) || [];
 const app = express();
 
@@ -58,7 +58,9 @@ app.get('/', (req, res) => {
 });
 
 app.get('/movie/:tmdbId', async (req, res) => {
+
     if (!checkIfPossibleTmdbId(req.params.tmdbId)) {
+
         return handleErrorResponse(
             res,
             new ErrorObject(
@@ -70,31 +72,37 @@ app.get('/movie/:tmdbId', async (req, res) => {
                 false
             )
         );
-    }
+
+    };
 
     const media = await getMovieFromTmdb(req.params.tmdbId);
+
     if (media instanceof ErrorObject) {
         return handleErrorResponse(res, media);
-    }
+    };
 
     const output = await scrapeMedia(media);
+
     if (output instanceof ErrorObject) {
         return handleErrorResponse(res, output);
-    }
+    };
     const processedOutput = processApiResponse(
         output,
         `${req.protocol}://${req.get('host')}`
     );
 
     res.status(200).json(processedOutput);
+
 });
 
 app.get('/tv/:tmdbId', async (req, res) => {
+
     if (
         !checkIfPossibleTmdbId(req.params.tmdbId) ||
         !checkIfPossibleTmdbId(req.query.s) ||
         !checkIfPossibleTmdbId(req.query.e)
     ) {
+
         return handleErrorResponse(
             res,
             new ErrorObject(
@@ -106,30 +114,36 @@ app.get('/tv/:tmdbId', async (req, res) => {
                 false
             )
         );
-    }
+
+    };
 
     const media = await getTvFromTmdb(
         req.params.tmdbId,
         req.query.s,
         req.query.e
     );
+
     if (media instanceof ErrorObject) {
         return handleErrorResponse(res, media);
-    }
+    };
 
     const output = await scrapeMedia(media);
+
     if (output instanceof ErrorObject) {
         return handleErrorResponse(res, output);
-    }
+    };
+
     const processedOutput = processApiResponse(
         output,
         `${req.protocol}://${req.get('host')}`
     );
 
     res.status(200).json(processedOutput);
+
 });
 
 app.get('/movie/', (req, res) => {
+
     handleErrorResponse(
         res,
         new ErrorObject(
@@ -141,9 +155,11 @@ app.get('/movie/', (req, res) => {
             false
         )
     );
+
 });
 
 app.get('/tv/', (req, res) => {
+
     handleErrorResponse(
         res,
         new ErrorObject(
@@ -155,20 +171,23 @@ app.get('/tv/', (req, res) => {
             false
         )
     );
+
 });
 
-// Endpoint to flex how well our cache is doing - because who doesn't love stats
-// Hell Yeah we love it, Because STONE COLD SAID SOOOOO
 app.get('/cache-stats', (req, res) => {
+
     const stats = getCacheStats();
+
     res.status(200).json({
         ...stats,
         cacheEnabled: true,
         ttl: '3 hours (10800 seconds)'
     });
+
 });
 
 app.get('/{*any}', (req, res) => {
+
     handleErrorResponse(
         res,
         new ErrorObject(
@@ -180,21 +199,20 @@ app.get('/{*any}', (req, res) => {
             false
         )
     );
+
 });
-const isMain = process.argv[1] === fileURLToPath(import.meta.url);
 
-if (isMain) {
-    startup();
-    app.listen(PORT, () => {
-        console.log(`Server is running on port http://localhost:${PORT}`);
-        if (process.argv.includes('--debug')) {
-            console.log(`Debug mode is enabled.`);
-            console.log('Cache is disabled.');
-        } else {
-            console.log('Debug mode is disabled.');
-            console.log('Cache is enabled.');
-        }
-    });
-}
+startup();
 
-export default app;
+app.listen(PORT, () => {
+
+    console.log(`Server is running on port http://localhost:${PORT}`);
+    if (process.argv.includes('--debug')) {
+        console.log(`Debug mode is enabled.`);
+        console.log('Cache is disabled.');
+    } else {
+        console.log('Debug mode is disabled.');
+        console.log('Cache is enabled.');
+    };
+
+});
