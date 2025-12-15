@@ -14,7 +14,7 @@ import {
 import { ErrorObject } from './src/helpers/ErrorObject.js';
 import { getCacheStats } from './src/cache/cache.js';
 import { startup } from './src/utils/startup.js';
-import authMiddleware from './src/middleware/auth.js';
+import { authMiddleware } from "./src/middleware/auth.js";
 
 const PORT = process.env.PORT || 3002;
 
@@ -46,8 +46,6 @@ app.use(
     })
 );
 
-app.use(authMiddleware);
-
 createProxyRoutes(app);
 
 app.get('/', (req, res) => {
@@ -60,7 +58,7 @@ app.get('/', (req, res) => {
     });
 });
 
-app.get('/movie/:tmdbId', async (req, res) => {
+app.get('/movie/:tmdbId', authMiddleware, async (req, res) => {
     if (!checkIfPossibleTmdbId(req.params.tmdbId)) {
         return handleErrorResponse(
             res,
@@ -87,6 +85,8 @@ app.get('/movie/:tmdbId', async (req, res) => {
         return handleErrorResponse(res, output);
     }
 
+    console.log('Scraper output files:', JSON.stringify(output.files, null, 2));
+
     const BASE_URL =
         process.env.BASE_URL || `${req.protocol}://${req.get('host')}`;
     const processedOutput = processApiResponse(output, BASE_URL);
@@ -94,7 +94,7 @@ app.get('/movie/:tmdbId', async (req, res) => {
     res.status(200).json(processedOutput);
 });
 
-app.get('/tv/:tmdbId', async (req, res) => {
+app.get('/tv/:tmdbId', authMiddleware, async (req, res) => {
     if (
         !checkIfPossibleTmdbId(req.params.tmdbId) ||
         !checkIfPossibleTmdbId(req.query.s) ||
@@ -164,7 +164,7 @@ app.get('/tv/', (req, res) => {
     );
 });
 
-app.get('/cache-stats', (req, res) => {
+app.get('/cache-stats', authMiddleware, (req, res) => {
     const stats = getCacheStats();
 
     res.status(200).json({

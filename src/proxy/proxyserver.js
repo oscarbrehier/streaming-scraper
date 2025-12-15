@@ -5,6 +5,7 @@ import { handleCors } from './handleCors.js';
 import { proxyM3U8 } from './m3u8proxy.js';
 import { proxyTs } from './proxyTs.js';
 import { generateSignedURL } from '../helpers/urls.js';
+import { authMiddleware, validateSignedToken } from '../middleware/auth.js';
 
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3002';
 
@@ -13,8 +14,9 @@ export const DEFAULT_USER_AGENT =
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
 
 export function createProxyRoutes(app) {
+
     // Test endpoint to verify proxy is working
-    app.get('/proxy/status', (req, res) => {
+    app.get('/proxy/status', authMiddleware, (req, res) => {
         if (handleCors(req, res)) return;
 
         res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -28,7 +30,7 @@ export function createProxyRoutes(app) {
     });
 
     // Simplified M3U8 Proxy endpoint based on working implementation
-    app.get('/m3u8-proxy', (req, res) => {
+    app.get('/m3u8-proxy', validateSignedToken, (req, res) => {
         if (handleCors(req, res)) return;
 
         const targetUrl = req.query.url;
@@ -56,7 +58,7 @@ export function createProxyRoutes(app) {
     });
 
     // Simplified TS/Segment Proxy endpoint
-    app.get('/ts-proxy', (req, res) => {
+    app.get('/ts-proxy', validateSignedToken, (req, res) => {
         if (handleCors(req, res)) return;
 
         const targetUrl = req.query.url;
@@ -156,74 +158,92 @@ export function createProxyRoutes(app) {
 export function processApiResponse(apiResponse, serverUrl) {
     if (!apiResponse.files) return apiResponse;
 
-    const processedFiles = apiResponse.files.map((file) => {
-        if (!file.file || typeof file.file !== 'string') return file;
+    const processedFiles = apiResponse.files
+        .map((file) => {
+            if (!file.file || typeof file.file !== 'string') return file;
 
-        let finalUrl = file.file;
-        let proxyHeaders = file.headers || {};
+            let finalUrl = file.file;
+            let proxyHeaders = file.headers || {};
 
-        // Extract original URL if it's wrapped in external proxy
-        finalUrl = extractOriginalUrl(finalUrl);
+            // Extract original URL if it's wrapped in external proxy
+            finalUrl = extractOriginalUrl(finalUrl);
 
-        // proxy ALL URLs through our system
-        if (
-            finalUrl.includes('.m3u8') ||
-            finalUrl.includes('m3u8') ||
-            (!finalUrl.includes('.mp4') &&
-                !finalUrl.includes('.mkv') &&
-                !finalUrl.includes('.webm') &&
-                !finalUrl.includes('.avi'))
-        ) {
-            // Use M3U8 proxy for HLS streams and unknown formats
-            const m3u8Origin = getOriginFromUrl(finalUrl);
-            if (m3u8Origin) {
-                proxyHeaders = {
-                    ...proxyHeaders,
-                    Referer: proxyHeaders.Referer || m3u8Origin,
-                    Origin: proxyHeaders.Origin || m3u8Origin
-                };
+            // Handle fallback URLs - split by " or " and find first valid one
+            if (finalUrl.includes(' or ')) {
+                const urls = finalUrl.split(' or ').map(u => u.trim());
+                
+                // Filter out URLs with unresolved placeholders
+                const validUrls = urls.filter(url => !url.includes('{v'));
+                
+                if (validUrls.length === 0) {
+                    console.warn(`All fallback URLs contain placeholders, skipping file`);
+                    return null; // Skip this file entirely
+                }
+                
+                finalUrl = validUrls[0];
+                console.log(`Multiple fallback URLs found, using first valid: ${finalUrl}`);
             }
 
-            const localProxyUrl = generateSignedURL(
-                `${serverUrl}/m3u8-proxy?url=${encodeURIComponent(finalUrl)}&headers=${encodeURIComponent(JSON.stringify(proxyHeaders))}`
-            );
-
-            return {
-                ...file,
-                file: localProxyUrl,
-                type: 'hls',
-                headers: proxyHeaders
-            };
-        } else {
-            // Use TS proxy for direct video files (.mp4, .mkv, .webm, .avi)
-            const videoOrigin = getOriginFromUrl(finalUrl);
-            if (videoOrigin) {
-                proxyHeaders = {
-                    ...proxyHeaders,
-                    Referer: proxyHeaders.Referer || videoOrigin,
-                    Origin: proxyHeaders.Origin || videoOrigin
-                };
+            // Skip URLs with unresolved placeholders
+            if (finalUrl.includes('{v')) {
+                console.warn(`Skipping URL with unresolved placeholder: ${finalUrl}`);
+                return null;
             }
 
-            const localProxyUrl = generateSignedURL(
-                `${serverUrl}/ts-proxy?url=${encodeURIComponent(finalUrl)}&headers=${encodeURIComponent(JSON.stringify(proxyHeaders))}`
-            );
+            // proxy ALL URLs through our system
+            if (
+                finalUrl.includes('.m3u8') ||
+                finalUrl.includes('m3u8') ||
+                (!finalUrl.includes('.mp4') &&
+                    !finalUrl.includes('.mkv') &&
+                    !finalUrl.includes('.webm') &&
+                    !finalUrl.includes('.avi'))
+            ) {
+                // Use M3U8 proxy for HLS streams and unknown formats
+                const m3u8Origin = getOriginFromUrl(finalUrl);
+                if (m3u8Origin) {
+                    proxyHeaders = {
+                        ...proxyHeaders,
+                        Referer: proxyHeaders.Referer || m3u8Origin,
+                        Origin: proxyHeaders.Origin || m3u8Origin
+                    };
+                }
 
-            return {
-                ...file,
-                file: localProxyUrl,
-                type: file.type || 'mp4',
-                headers: proxyHeaders
-            };
-        }
-    });
+                const localProxyUrl = generateSignedURL(`${serverUrl}/m3u8-proxy?url=${encodeURIComponent(finalUrl)}&headers=${encodeURIComponent(JSON.stringify(proxyHeaders))}`);
+
+                return {
+                    ...file,
+                    file: localProxyUrl,
+                    type: 'hls',
+                    headers: proxyHeaders
+                };
+            } else {
+                // Use TS proxy for direct video files (.mp4, .mkv, .webm, .avi)
+                const videoOrigin = getOriginFromUrl(finalUrl);
+                if (videoOrigin) {
+                    proxyHeaders = {
+                        ...proxyHeaders,
+                        Referer: proxyHeaders.Referer || videoOrigin,
+                        Origin: proxyHeaders.Origin || videoOrigin
+                    };
+                }
+
+                const localProxyUrl = generateSignedURL( `${serverUrl}/ts-proxy?url=${encodeURIComponent(finalUrl)}&headers=${encodeURIComponent(JSON.stringify(proxyHeaders))}`);
+
+                return {
+                    ...file,
+                    file: localProxyUrl,
+                    type: file.type || 'mp4',
+                    headers: proxyHeaders
+                };
+            }
+        })
+        .filter(file => file !== null); // Remove null entries (invalid URLs)
 
     const processedSubtitles = (apiResponse.subtitles || []).map((sub) => {
         if (!sub.url || typeof sub.url !== 'string') return sub;
 
-        const localProxyUrl = generateSignedURL(
-            `${serverUrl}/sub-proxy?url=${encodeURIComponent(sub.url)}`
-        );
+        const localProxyUrl = generateSignedURL(`${serverUrl}/sub-proxy?url=${encodeURIComponent(sub.url)}`);
         return {
             ...sub,
             url: localProxyUrl
