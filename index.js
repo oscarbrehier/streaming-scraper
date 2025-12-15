@@ -14,6 +14,7 @@ import {
 import { ErrorObject } from './src/helpers/ErrorObject.js';
 import { getCacheStats } from './src/cache/cache.js';
 import { startup } from './src/utils/startup.js';
+import authMiddleware from './src/middleware/auth.js';
 
 const PORT = process.env.PORT || 3002;
 
@@ -44,6 +45,8 @@ app.use(
         }
     })
 );
+
+app.use(authMiddleware);
 
 createProxyRoutes(app);
 
