@@ -3,6 +3,7 @@ import { extractOriginalUrl, getOriginFromUrl } from './parser.js';
 import { handleCors } from './handleCors.js';
 import { proxyM3U8 } from './m3u8proxy.js';
 import { proxyTs } from './proxyTs.js';
+import { generateSignedURL } from '../helpers/urls.js';
 
 // Default user agent
 export const DEFAULT_USER_AGENT =
@@ -180,7 +181,7 @@ export function processApiResponse(apiResponse, serverUrl) {
                 };
             }
 
-            const localProxyUrl = `${serverUrl}/m3u8-proxy?url=${encodeURIComponent(finalUrl)}&headers=${encodeURIComponent(JSON.stringify(proxyHeaders))}`;
+            const localProxyUrl = generateSignedURL(`${serverUrl}/m3u8-proxy?url=${encodeURIComponent(finalUrl)}&headers=${encodeURIComponent(JSON.stringify(proxyHeaders))}`);
 
             return {
                 ...file,
@@ -199,7 +200,7 @@ export function processApiResponse(apiResponse, serverUrl) {
                 };
             }
 
-            const localProxyUrl = `${serverUrl}/ts-proxy?url=${encodeURIComponent(finalUrl)}&headers=${encodeURIComponent(JSON.stringify(proxyHeaders))}`;
+            const localProxyUrl = generateSignedURL(`${serverUrl}/ts-proxy?url=${encodeURIComponent(finalUrl)}&headers=${encodeURIComponent(JSON.stringify(proxyHeaders))}`);
 
             return {
                 ...file,
@@ -213,7 +214,7 @@ export function processApiResponse(apiResponse, serverUrl) {
     const processedSubtitles = (apiResponse.subtitles || []).map((sub) => {
         if (!sub.url || typeof sub.url !== 'string') return sub;
 
-        const localProxyUrl = `${serverUrl}/sub-proxy?url=${encodeURIComponent(sub.url)}`;
+        const localProxyUrl = generateSignedURL(`${serverUrl}/sub-proxy?url=${encodeURIComponent(sub.url)}`);
         return {
             ...sub,
             url: localProxyUrl

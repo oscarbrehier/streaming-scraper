@@ -1,6 +1,7 @@
 // M3U8 proxy function based on the working implementation
 import fetch from 'node-fetch';
 import { DEFAULT_USER_AGENT } from './proxyserver.js';
+import { generateSignedURL } from '../helpers/urls.js';
 
 export async function proxyM3U8(targetUrl, headers, res, serverUrl) {
     try {
@@ -33,7 +34,9 @@ export async function proxyM3U8(targetUrl, headers, res, serverUrl) {
                 const uriMatch = line.match(/URI="([^"]+)"/);
                 if (uriMatch) {
                     const mediaUrl = new URL(uriMatch[1], targetUrl).href;
-                    const proxyUrl = `${serverUrl}/m3u8-proxy?url=${encodeURIComponent(mediaUrl)}`;
+                    const proxyUrl = generateSignedURL(
+                        `${serverUrl}/m3u8-proxy?url=${encodeURIComponent(mediaUrl)}`
+                    );
                     return line.replace(uriMatch[1], proxyUrl);
                 }
                 return line;
@@ -44,7 +47,9 @@ export async function proxyM3U8(targetUrl, headers, res, serverUrl) {
                 const uriMatch = line.match(/URI="([^"]+)"/);
                 if (uriMatch) {
                     const keyUrl = new URL(uriMatch[1], targetUrl).href;
-                    const proxyUrl = `${serverUrl}/ts-proxy?url=${encodeURIComponent(keyUrl)}`;
+                    const proxyUrl = generateSignedURL(
+                        `${serverUrl}/ts-proxy?url=${encodeURIComponent(keyUrl)}`
+                    );
                     return line.replace(uriMatch[1], proxyUrl);
                 }
                 return line;
@@ -57,10 +62,16 @@ export async function proxyM3U8(targetUrl, headers, res, serverUrl) {
 
                     // Check if it's another m3u8 file (master playlist)
                     if (line.includes('.m3u8') || line.includes('m3u8')) {
-                        return `${serverUrl}/m3u8-proxy?url=${encodeURIComponent(segmentUrl)}`;
+                        const signedUrl = generateSignedURL(
+                            `${serverUrl}/m3u8-proxy?url=${encodeURIComponent(segmentUrl)}`
+                        );
+                        return signedUrl;
                     } else {
                         // It's a media segment
-                        return `${serverUrl}/ts-proxy?url=${encodeURIComponent(segmentUrl)}`;
+                        const signedUrl = generateSignedURL(
+                            `${serverUrl}/ts-proxy?url=${encodeURIComponent(segmentUrl)}`
+                        );
+                        return signedUrl;
                     }
                 } catch (e) {
                     return line; // Return original if URL parsing fails
