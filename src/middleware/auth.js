@@ -3,75 +3,85 @@ import jwt from 'jsonwebtoken';
 
 const SECRET = process.env.SCRAPER_SECRET;
 const API_KEY = process.env.SCRAPER_API_KEY;
+const BASE_URL = process.env.BASE_URL || 'http://localhost:3002';
 
-function authMiddleware(req, res, next) {
-    const { token: queryToken, url } = req.query;
+// Helper to properly decode query values
+function decodeQueryString(str) {
+    return decodeURIComponent(str.replace(/\+/g, ' '));
+};
 
-    console.log('TOKEN', queryToken);
+export function validateSignedToken(req, res, next) {
 
-    if (req.url.endsWith('.m3u8')) {
-        console.log('Playlist request', queryToken);
-    } else {
-        console.log('Segment request', queryToken);
-    }
+    const { token: queryToken } = req.query;
 
-    if (queryToken) {
-        try {
-            const payload = jwt.verify(queryToken, SECRET);
+    // For internal unsigned requests from m3u8 proxy
+    if (!queryToken) {
+        return next();
+    };
 
-            const protocol =
-                req.headers['x-forwarded-proto'] || req.protocol || 'http';
-            const host = req.headers.host;
-            const pathname = req.path;
+    try {
 
-            const queryParams = new URLSearchParams();
-            for (const [key, value] of Object.entries(req.query)) {
-                if (key !== 'token') {
-                    queryParams.append(key, value);
-                }
+        const payload = jwt.verify(queryToken, SECRET);
+        const pathname = req.path;
+
+        // Build query string without the token
+        const queryParams = new URLSearchParams();
+        for (const [key, value] of Object.entries(req.query)) {
+            if (key !== 'token') {
+                queryParams.append(key, value);
             }
+        }
 
-            const reconstructedUrl = `${protocol}://${host}${pathname}?${queryParams.toString()}`;
+        const reconstructedUrl = `${BASE_URL}${pathname}?${queryParams.toString()}`;
 
-            if (payload.url !== reconstructedUrl) {
-                console.log('URL mismatch:');
-                console.log('Expected:', payload.url);
-                console.log('Got:', reconstructedUrl);
+        const normalizedExpected = decodeQueryString(payload.url);
+        const normalizedReconstructed = decodeQueryString(reconstructedUrl);
 
-                return res.status(403).json({
-                    error: 'Forbidden',
-                    message: 'Token not valid for this URL'
-                });
-            };
-
-            return next();
-        } catch (err) {
+        if (normalizedExpected !== normalizedReconstructed) {
             return res.status(403).json({
                 error: 'Forbidden',
-                message: 'Invalid or expired token'
+                message: 'Token not valid for this URL'
             });
-        }
-    }
+        };
 
+        return next();
+
+    } catch (err) {
+
+        return res.status(403).json({
+            error: 'Forbidden',
+            message: 'Invalid or expired token'
+        });
+
+    };
+
+};
+
+export function authMiddleware(req, res, next) {
+
+    // For API routes (/movie, /tv), check Bearer token
     const authHeader = req.headers.authorization || '';
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+
         return res.status(401).json({
             error: 'Unauthorized',
             message: 'Missing or invalid Authorization header'
         });
-    }
+
+    };
 
     const token = authHeader.split(' ')[1];
 
     if (token !== API_KEY) {
+
         return res.status(401).json({
             error: 'Unauthorized',
-            message: 'Missing or invalid token'
+            message: 'Invalid API key'
         });
-    }
+
+    };
 
     next();
-}
 
-export default authMiddleware;
+};

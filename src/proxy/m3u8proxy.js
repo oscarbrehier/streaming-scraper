@@ -34,9 +34,7 @@ export async function proxyM3U8(targetUrl, headers, res, serverUrl) {
                 const uriMatch = line.match(/URI="([^"]+)"/);
                 if (uriMatch) {
                     const mediaUrl = new URL(uriMatch[1], targetUrl).href;
-                    const proxyUrl = generateSignedURL(
-                        `${serverUrl}/m3u8-proxy?url=${encodeURIComponent(mediaUrl)}`
-                    );
+                    const proxyUrl = `${serverUrl}/m3u8-proxy?url=${encodeURIComponent(mediaUrl)}`;
                     return line.replace(uriMatch[1], proxyUrl);
                 }
                 return line;
@@ -47,9 +45,7 @@ export async function proxyM3U8(targetUrl, headers, res, serverUrl) {
                 const uriMatch = line.match(/URI="([^"]+)"/);
                 if (uriMatch) {
                     const keyUrl = new URL(uriMatch[1], targetUrl).href;
-                    const proxyUrl = generateSignedURL(
-                        `${serverUrl}/ts-proxy?url=${encodeURIComponent(keyUrl)}`
-                    );
+                    const proxyUrl = `${serverUrl}/ts-proxy?url=${encodeURIComponent(keyUrl)}`;
                     return line.replace(uriMatch[1], proxyUrl);
                 }
                 return line;
@@ -62,15 +58,11 @@ export async function proxyM3U8(targetUrl, headers, res, serverUrl) {
 
                     // Check if it's another m3u8 file (master playlist)
                     if (line.includes('.m3u8') || line.includes('m3u8')) {
-                        const signedUrl = generateSignedURL(
-                            `${serverUrl}/m3u8-proxy?url=${encodeURIComponent(segmentUrl)}`
-                        );
+                        const signedUrl = `${serverUrl}/m3u8-proxy?url=${encodeURIComponent(segmentUrl)}`;
                         return signedUrl;
                     } else {
                         // It's a media segment
-                        const signedUrl = generateSignedURL(
-                            `${serverUrl}/ts-proxy?url=${encodeURIComponent(segmentUrl)}`
-                        );
+                        const signedUrl = `${serverUrl}/ts-proxy?url=${encodeURIComponent(segmentUrl)}`;
                         return signedUrl;
                     }
                 } catch (e) {
