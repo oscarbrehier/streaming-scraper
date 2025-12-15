@@ -61,9 +61,7 @@ app.get('/', (req, res) => {
 });
 
 app.get('/movie/:tmdbId', async (req, res) => {
-
     if (!checkIfPossibleTmdbId(req.params.tmdbId)) {
-
         return handleErrorResponse(
             res,
             new ErrorObject(
@@ -75,37 +73,33 @@ app.get('/movie/:tmdbId', async (req, res) => {
                 false
             )
         );
-
-    };
+    }
 
     const media = await getMovieFromTmdb(req.params.tmdbId);
 
     if (media instanceof ErrorObject) {
         return handleErrorResponse(res, media);
-    };
+    }
 
     const output = await scrapeMedia(media);
 
     if (output instanceof ErrorObject) {
         return handleErrorResponse(res, output);
-    };
-    const processedOutput = processApiResponse(
-        output,
-        `${req.protocol}://${req.get('host')}`
-    );
+    }
+
+    const BASE_URL =
+        process.env.BASE_URL || `${req.protocol}://${req.get('host')}`;
+    const processedOutput = processApiResponse(output, BASE_URL);
 
     res.status(200).json(processedOutput);
-
 });
 
 app.get('/tv/:tmdbId', async (req, res) => {
-
     if (
         !checkIfPossibleTmdbId(req.params.tmdbId) ||
         !checkIfPossibleTmdbId(req.query.s) ||
         !checkIfPossibleTmdbId(req.query.e)
     ) {
-
         return handleErrorResponse(
             res,
             new ErrorObject(
@@ -117,8 +111,7 @@ app.get('/tv/:tmdbId', async (req, res) => {
                 false
             )
         );
-
-    };
+    }
 
     const media = await getTvFromTmdb(
         req.params.tmdbId,
@@ -128,25 +121,22 @@ app.get('/tv/:tmdbId', async (req, res) => {
 
     if (media instanceof ErrorObject) {
         return handleErrorResponse(res, media);
-    };
+    }
 
     const output = await scrapeMedia(media);
 
     if (output instanceof ErrorObject) {
         return handleErrorResponse(res, output);
-    };
+    }
 
-    const processedOutput = processApiResponse(
-        output,
-        `${req.protocol}://${req.get('host')}`
-    );
+    const BASE_URL =
+        process.env.BASE_URL || `${req.protocol}://${req.get('host')}`;
+    const processedOutput = processApiResponse(output, BASE_URL);
 
     res.status(200).json(processedOutput);
-
 });
 
 app.get('/movie/', (req, res) => {
-
     handleErrorResponse(
         res,
         new ErrorObject(
@@ -158,11 +148,9 @@ app.get('/movie/', (req, res) => {
             false
         )
     );
-
 });
 
 app.get('/tv/', (req, res) => {
-
     handleErrorResponse(
         res,
         new ErrorObject(
@@ -174,11 +162,9 @@ app.get('/tv/', (req, res) => {
             false
         )
     );
-
 });
 
 app.get('/cache-stats', (req, res) => {
-
     const stats = getCacheStats();
 
     res.status(200).json({
@@ -186,11 +172,9 @@ app.get('/cache-stats', (req, res) => {
         cacheEnabled: true,
         ttl: '3 hours (10800 seconds)'
     });
-
 });
 
 app.get('/{*any}', (req, res) => {
-
     handleErrorResponse(
         res,
         new ErrorObject(
@@ -202,13 +186,11 @@ app.get('/{*any}', (req, res) => {
             false
         )
     );
-
 });
 
 startup();
 
 app.listen(PORT, () => {
-
     console.log(`Server is running on port http://localhost:${PORT}`);
     if (process.argv.includes('--debug')) {
         console.log(`Debug mode is enabled.`);
@@ -216,6 +198,5 @@ app.listen(PORT, () => {
     } else {
         console.log('Debug mode is disabled.');
         console.log('Cache is enabled.');
-    };
-
+    }
 });
