@@ -1,9 +1,12 @@
+import 'dotenv/config';
 import fetch from 'node-fetch';
 import { extractOriginalUrl, getOriginFromUrl } from './parser.js';
 import { handleCors } from './handleCors.js';
 import { proxyM3U8 } from './m3u8proxy.js';
 import { proxyTs } from './proxyTs.js';
 import { generateSignedURL } from '../helpers/urls.js';
+
+const BASE_URL = process.env.BASE_URL || 'http://localhost:3002';
 
 // Default user agent
 export const DEFAULT_USER_AGENT =
@@ -49,7 +52,7 @@ export function createProxyRoutes(app) {
         const host = req.headers.host;
         const serverUrl = `${protocol}://${host}`;
 
-        proxyM3U8(targetUrl, headers, res, serverUrl);
+        proxyM3U8(targetUrl, headers, res, BASE_URL);
     });
 
     // Simplified TS/Segment Proxy endpoint
@@ -98,7 +101,7 @@ export function createProxyRoutes(app) {
         const host = req.headers.host;
         const serverUrl = `${protocol}://${host}`;
 
-        proxyM3U8(targetUrl, headers, res, serverUrl);
+        proxyM3U8(targetUrl, headers, res, BASE_URL);
     });
 
     // Subtitle Proxy endpoint
@@ -181,7 +184,9 @@ export function processApiResponse(apiResponse, serverUrl) {
                 };
             }
 
-            const localProxyUrl = generateSignedURL(`${serverUrl}/m3u8-proxy?url=${encodeURIComponent(finalUrl)}&headers=${encodeURIComponent(JSON.stringify(proxyHeaders))}`);
+            const localProxyUrl = generateSignedURL(
+                `${serverUrl}/m3u8-proxy?url=${encodeURIComponent(finalUrl)}&headers=${encodeURIComponent(JSON.stringify(proxyHeaders))}`
+            );
 
             return {
                 ...file,
@@ -200,7 +205,9 @@ export function processApiResponse(apiResponse, serverUrl) {
                 };
             }
 
-            const localProxyUrl = generateSignedURL(`${serverUrl}/ts-proxy?url=${encodeURIComponent(finalUrl)}&headers=${encodeURIComponent(JSON.stringify(proxyHeaders))}`);
+            const localProxyUrl = generateSignedURL(
+                `${serverUrl}/ts-proxy?url=${encodeURIComponent(finalUrl)}&headers=${encodeURIComponent(JSON.stringify(proxyHeaders))}`
+            );
 
             return {
                 ...file,
@@ -214,7 +221,9 @@ export function processApiResponse(apiResponse, serverUrl) {
     const processedSubtitles = (apiResponse.subtitles || []).map((sub) => {
         if (!sub.url || typeof sub.url !== 'string') return sub;
 
-        const localProxyUrl = generateSignedURL(`${serverUrl}/sub-proxy?url=${encodeURIComponent(sub.url)}`);
+        const localProxyUrl = generateSignedURL(
+            `${serverUrl}/sub-proxy?url=${encodeURIComponent(sub.url)}`
+        );
         return {
             ...sub,
             url: localProxyUrl
