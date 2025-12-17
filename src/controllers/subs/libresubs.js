@@ -1,4 +1,4 @@
-import { proxiedFetch } from "../../helpers/proxiedFetch";
+import { proxiedFetch } from "../../helpers/proxiedFetch.js";
 
 export async function getLibre(media) {
     const DOMAIN = `https://libre-subs.fifthwit.net/search?id=${media.tmdb}`;
