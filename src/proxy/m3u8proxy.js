@@ -5,6 +5,17 @@ import { generateSignedURL } from '../helpers/urls.js';
 
 export async function proxyM3U8(targetUrl, headers, res, serverUrl) {
     try {
+
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Access-Control-Allow-Headers', '*');
+        res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
+
+        if (res.req.method === 'OPTIONS') {
+            res.writeHead(204);
+            res.end();
+            return;
+        }
+
         const response = await fetch(targetUrl, {
             headers: {
                 'User-Agent': DEFAULT_USER_AGENT,
@@ -77,7 +88,7 @@ export async function proxyM3U8(targetUrl, headers, res, serverUrl) {
 
         // Set proper headers
         res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
-        res.setHeader('Content-Length', Buffer.byteLength(processedContent));
+        // res.setHeader('Content-Length', Buffer.byteLength(processedContent));
         res.setHeader('Cache-Control', 'no-cache');
 
         res.writeHead(200);
