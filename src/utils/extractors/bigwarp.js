@@ -1,4 +1,5 @@
 import { ErrorObject } from '../../helpers/ErrorObject.js';
+import { proxiedFetch } from '../../helpers/proxiedFetch.js';
 
 export async function extract_bigwarp(url) {
     let hostname = url.match(/https?:\/\/([^\/]+)/)[1];
@@ -15,7 +16,7 @@ export async function extract_bigwarp(url) {
             Origin: `${hostname}`
         };
 
-        const response = await fetch(url, { headers });
+        const response = await proxiedFetch(url, { headers });
         const html = await response.text();
 
         // Now, ... Extractingg video sources using regex

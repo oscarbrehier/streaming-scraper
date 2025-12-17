@@ -3,6 +3,7 @@ import { ErrorObject } from '../../../helpers/ErrorObject.js';
 import { extract } from '../../../utils/Extractor.js';
 import * as cheerio from 'cheerio';
 import JsUnpacker from '../../../utils/jsunpack.js';
+import { proxiedFetch } from '../../../helpers/proxiedFetch.js';
 
 const DOMAIN = 'https://www.2embed.cc';
 const PLAYER_URL = 'https://uqloads.xyz';
@@ -33,7 +34,7 @@ export async function getTwoEmbed(params) {
             : `${DOMAIN}/embed/${tmdb}`;
 
     try {
-        const response = await fetch(url, {
+        const response = await proxiedFetch(url, {
             method: 'POST',
             headers: {
                 Referer: url,
@@ -108,7 +109,7 @@ export async function getTwoEmbed(params) {
                 subtitles: []
             };
         } else {
-            const listPageResponse = await fetch(extractedValue, {
+            const listPageResponse = await proxiedFetch(extractedValue, {
                 headers: {
                     Referer: url
                 }
@@ -219,7 +220,7 @@ export async function getTwoEmbed(params) {
 
 async function resolve(url, referer) {
     try {
-        const response = await fetch(url, {
+        const response = await proxiedFetch(url, {
             headers: {
                 Referer: referer,
                 'User-Agent': headers['User-Agent']

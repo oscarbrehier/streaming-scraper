@@ -1,6 +1,7 @@
 import fetch from 'node-fetch';
 import * as cheerio from 'cheerio';
 import { ErrorObject } from '../../helpers/ErrorObject.js';
+import { proxiedFetch } from '../../helpers/proxiedFetch.js';
 
 // Thanks to
 // https://github.com/Gujal00/ResolveURL/blob/master/script.module.resolveurl/lib/resolveurl/plugins/savefiles.py
@@ -50,7 +51,7 @@ export async function extract_savefiles(url) {
         };
 
         // fetch the page
-        const response = await fetch(targetUrl, { headers });
+        const response = await proxiedFetch(targetUrl, { headers });
 
         if (!response.ok) {
             return new ErrorObject(

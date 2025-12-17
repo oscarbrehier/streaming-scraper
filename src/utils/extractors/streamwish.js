@@ -1,10 +1,11 @@
 import fetch from 'node-fetch';
 import JsUnpacker from '../jsunpack.js';
 import { ErrorObject } from '../../helpers/ErrorObject.js';
+import { proxiedFetch } from '../../helpers/proxiedFetch.js';
 
 export async function extract_streamwish(url, referer) {
     try {
-        const response = await fetch(url, {
+        const response = await proxiedFetch(url, {
             headers: {
                 Referer: referer,
                 'User-Agent':

@@ -1,6 +1,7 @@
 import { webcrypto } from 'crypto';
 import { languageMap } from '../../../utils/languages.js';
 import { ErrorObject } from '../../../helpers/ErrorObject.js';
+import { proxiedFetch } from '../../../helpers/proxiedFetch.js';
 
 const DOMAIN = 'https://vidrock.net';
 const PASSPHRASE = 'x7k9mPqT2rWvY8zA5bC3nF6hJ2lK4mN9';
@@ -37,7 +38,7 @@ export async function getVidRock(media) {
         );
         console.log('[getVidRock] Making fetch request to:', link);
 
-        let sources = await fetch(link, {
+        let sources = await proxiedFetch(link, {
             headers: requestHeaders
         });
 

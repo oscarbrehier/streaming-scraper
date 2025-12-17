@@ -1,4 +1,5 @@
 import { ErrorObject } from '../../helpers/ErrorObject.js';
+import { proxiedFetch } from '../../helpers/proxiedFetch.js';
 import JsUnpacker from '../jsunpack.js';
 
 // Special Thanks to
@@ -172,7 +173,7 @@ export async function extract_filemoon(url) {
 
         // First request
         console.log('[extract_filemoon] Making first request...');
-        let response = await fetch(webUrl, { headers });
+        let response = await proxiedFetch(webUrl, { headers });
         console.log(
             '[extract_filemoon] Response status:',
             response.status,
@@ -205,7 +206,7 @@ export async function extract_filemoon(url) {
             );
             webUrl = webUrl.replace('/e/', '/d/');
             console.log('[extract_filemoon] New URL:', webUrl);
-            response = await fetch(webUrl, { headers });
+            response = await proxiedFetch(webUrl, { headers });
             console.log(
                 '[extract_filemoon] Response status:',
                 response.status,
@@ -237,7 +238,7 @@ export async function extract_filemoon(url) {
 
             webUrl = iframeMatch[1];
             console.log('[extract_filemoon] Fetching iframe URL:', webUrl);
-            response = await fetch(webUrl, { headers });
+            response = await proxiedFetch(webUrl, { headers });
             console.log(
                 '[extract_filemoon] Iframe response status:',
                 response.status,
@@ -398,7 +399,7 @@ export async function extract_filemoon(url) {
 
             console.log('[extract_filemoon] POST body:', formBody);
 
-            const postResponse = await fetch(dlUrl, {
+            const postResponse = await proxiedFetch(dlUrl, {
                 method: 'POST',
                 headers: headers,
                 body: formBody

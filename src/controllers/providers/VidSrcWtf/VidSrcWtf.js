@@ -1,4 +1,5 @@
 import { ErrorObject } from '../../../helpers/ErrorObject.js';
+import { proxiedFetch } from '../../../helpers/proxiedFetch.js';
 
 const DOMAIN = 'https://vidsrc.wtf';
 const API_DOMAIN = 'https://api.rgshows.me/main';
@@ -17,7 +18,7 @@ export async function getVidsrcWtf(media) {
         url = `${API_DOMAIN}/tv/${media.tmdb}/${media.season}/${media.episode}`;
     }
 
-    const response = await fetch(url, {
+    const response = await proxiedFetch(url, {
         method: 'GET',
         headers: headers
     });

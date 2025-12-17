@@ -1,6 +1,7 @@
 import fetch from 'node-fetch';
 import * as cheerio from 'cheerio';
 import { ErrorObject } from '../../helpers/ErrorObject.js';
+import { proxiedFetch } from '../../helpers/proxiedFetch.js';
 
 export async function extract_voesx(url) {
     try {
@@ -48,7 +49,7 @@ export async function extract_voesx(url) {
         };
 
         // fetch the embed page
-        const response = await fetch(embedUrl, { headers });
+        const response = await proxiedFetch(embedUrl, { headers });
 
         if (!response.ok) {
             return new ErrorObject(
@@ -71,7 +72,7 @@ export async function extract_voesx(url) {
             if (redirectMatch) {
                 const redirectUrl = redirectMatch[1];
 
-                const redirectResponse = await fetch(redirectUrl, { headers });
+                const redirectResponse = await proxiedFetch(redirectUrl, { headers });
                 if (redirectResponse.ok) {
                     html = await redirectResponse.text();
                 }
@@ -86,7 +87,7 @@ export async function extract_voesx(url) {
             const encodedData = jsonScriptMatch[1];
             const scriptUrl = new URL(jsonScriptMatch[2], embedUrl).href;
 
-            const scriptResponse = await fetch(scriptUrl, { headers });
+            const scriptResponse = await proxiedFetch(scriptUrl, { headers });
             if (scriptResponse.ok) {
                 const scriptContent = await scriptResponse.text();
                 const replMatch = scriptContent.match(

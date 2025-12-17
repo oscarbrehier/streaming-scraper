@@ -1,6 +1,7 @@
 // TS/Segment proxy function based on the working implementation
 import fetch from 'node-fetch';
 import { DEFAULT_USER_AGENT } from './proxyserver.js';
+import { proxiedFetch } from '../helpers/proxiedFetch.js';
 
 export async function proxyTs(targetUrl, headers, req, res) {
     try {
@@ -26,7 +27,7 @@ export async function proxyTs(targetUrl, headers, req, res) {
             fetchHeaders['Range'] = req.headers.range;
         }
 
-        const response = await fetch(targetUrl, {
+        const response = await proxiedFetch(targetUrl, {
             headers: fetchHeaders
         });
 

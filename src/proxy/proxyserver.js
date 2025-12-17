@@ -6,6 +6,7 @@ import { proxyM3U8 } from './m3u8proxy.js';
 import { proxyTs } from './proxyTs.js';
 import { generateSignedURL } from '../helpers/urls.js';
 import { authMiddleware, validateSignedToken } from '../middleware/auth.js';
+import { proxiedFetch } from '../helpers/proxiedFetch.js';
 
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3002';
 
@@ -125,7 +126,7 @@ export function createProxyRoutes(app) {
             return;
         }
 
-        fetch(targetUrl, {
+        proxiedFetch(targetUrl, {
             headers: {
                 'User-Agent': DEFAULT_USER_AGENT,
                 ...headers

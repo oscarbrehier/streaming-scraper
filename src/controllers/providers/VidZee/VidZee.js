@@ -1,4 +1,5 @@
 import { ErrorObject } from '../../../helpers/ErrorObject.js';
+import { proxiedFetch } from '../../../helpers/proxiedFetch.js';
 
 const DOMAIN = 'https://player.vidzee.wtf/';
 const API_DOMAIN = 'https://player.vidzee.wtf/api';
@@ -37,7 +38,7 @@ export async function getVidZee(media) {
     let allFiles = [];
     for (const url of urls) {
         try {
-            const response = await fetch(url, {
+            const response = await proxiedFetch(url, {
                 method: 'GET',
                 headers: headers
             });

@@ -1,4 +1,5 @@
 import { ErrorObject } from '../../../helpers/ErrorObject.js';
+import { proxiedFetch } from '../../../helpers/proxiedFetch.js';
 import { languageMap } from '../../../utils/languages.js';
 
 const DOMAIN = 'https://xprime.tv/';
@@ -6,7 +7,7 @@ const BACKEND_DOMAIN = 'https://backend.xprime.tv/';
 
 export async function getXprime(media) {
     try {
-        let status = await fetch(BACKEND_DOMAIN + 'servers', {
+        let status = await proxiedFetch(BACKEND_DOMAIN + 'servers', {
             headers: {
                 Accept: '*/*',
                 Referer: DOMAIN + 'watch/' + media.tmdb,
@@ -121,7 +122,7 @@ async function doPhoenixStuff(media, files, subtitles, errors) {
         url = `${BACKEND_DOMAIN}phoenix?name=${encodeURI(media.title)}&year=${media.year}&id=${media.tmdb}&imdb=${media.imdb}&season=${media.season}&episode=${media.episode}`;
     }
 
-    let data = await fetch(url, {
+    let data = await proxiedFetch(url, {
         headers: {
             Accept: '*/*',
             Referer: DOMAIN + 'watch/' + media.tmdb,
@@ -152,7 +153,7 @@ async function doPrimenetStuff(media, files, subtitles, errors) {
         url = `${BACKEND_DOMAIN}primenet?name=${encodeURI(media.title)}&year=${media.year}&id=${media.tmdb}&imdb=${media.imdb}&season=${media.season}&episode=${media.episode}`;
     }
 
-    let data = await fetch(url, {
+    let data = await proxiedFetch(url, {
         headers: {
             Accept: '*/*',
             Referer: DOMAIN + 'watch/' + media.tmdb,
@@ -197,7 +198,7 @@ async function doPrimeboxStuff(media, files, subtitles, errors) {
         url = `${BACKEND_DOMAIN}primebox?name=${encodeURI(media.title)}&year=${media.year}&season=${media.season}&episode=${media.episode}`;
     }
 
-    let data = await fetch(url, {
+    let data = await proxiedFetch(url, {
         headers: {
             Accept: '*/*',
             Referer: DOMAIN + 'watch/' + media.tmdb,
