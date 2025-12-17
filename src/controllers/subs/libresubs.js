@@ -1,3 +1,5 @@
+import { proxiedFetch } from "../../helpers/proxiedFetch";
+
 export async function getLibre(media) {
     const DOMAIN = `https://libre-subs.fifthwit.net/search?id=${media.tmdb}`;
 
@@ -7,7 +9,7 @@ export async function getLibre(media) {
     } else {
         url = `${DOMAIN}&season=${media.season}&episode=${media.episode}`;
     }
-    let request = await fetch(url);
+    let request = await proxiedFetch(url);
 
     let subtitlesWithNerdyAmountOfInformation = await request.json();
 

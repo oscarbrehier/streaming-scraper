@@ -4,6 +4,7 @@ import * as crypto from 'crypto';
 import fetch from 'node-fetch';
 import { extract } from '../../../utils/Extractor.js';
 import { ErrorObject } from '../../../helpers/ErrorObject.js';
+import { proxiedFetch } from '../../../helpers/proxiedFetch.js';
 
 const URL = 'https://www.primewire.tf';
 const DS_KEY = 'JyjId97F9PVqUPuMO0';
@@ -102,7 +103,7 @@ async function lookupPage(info) {
 
 async function loadServers(link) {
     try {
-        let website = await fetch(link);
+        let website = await proxiedFetch(link);
         website = await website.text();
 
         const $ = cheerio.load(website);

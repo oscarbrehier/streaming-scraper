@@ -1,6 +1,7 @@
 import fetch from 'node-fetch';
 import * as crypto from 'node:crypto';
 import { ErrorObject } from '../../../helpers/ErrorObject.js';
+import { proxiedFetch } from '../../../helpers/proxiedFetch.js';
 
 // Constants
 const DOMAIN = 'https://player.vidsrc.co/';
@@ -44,7 +45,7 @@ export async function getAutoembed(media) {
             }
 
             const serverUrl = `${url}&sr=${i}`;
-            const response = await fetch(serverUrl, {
+            const response = await proxiedFetch(serverUrl, {
                 method: 'GET',
                 headers: headers
             });

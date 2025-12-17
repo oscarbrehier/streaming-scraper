@@ -1,6 +1,7 @@
 import { languageMap } from '../../../utils/languages.js';
 import { generateVRF } from './vrfgen.js';
 import { ErrorObject } from '../../../helpers/ErrorObject.js';
+import { proxiedFetch } from '../../../helpers/proxiedFetch.js';
 
 const DOMAIN = 'https://vidsrc.cc/api/';
 
@@ -17,7 +18,7 @@ export async function getVidSrcCC(media) {
             ? `https://vidsrc.cc/v2/embed/movie/${media.tmdb}`
             : `https://vidsrc.cc/v2/embed/tv/${media.tmdb}/${media.season}/${media.episode}`;
 
-    const embedResponse = await fetch(embedUrl, {
+    const embedResponse = await proxiedFetch(embedUrl, {
         headers: {
             'User-Agent':
                 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36',
@@ -75,7 +76,7 @@ export async function getVidSrcCC(media) {
         Origin: origin
     };
 
-    let firstResponse = await fetch(firstUrl, { headers });
+    let firstResponse = await proxiedFetch(firstUrl, { headers });
 
     if (firstResponse.status !== 200) {
         return new ErrorObject(
@@ -98,7 +99,7 @@ export async function getVidSrcCC(media) {
 
     for (let hash of hashes) {
         let secondUrl = `${DOMAIN}source/${hash}?opensubtitles=true`;
-        let secondResponse = await fetch(secondUrl, { headers });
+        let secondResponse = await proxiedFetch(secondUrl, { headers });
         if (!secondResponse.ok) {
             return new ErrorObject(
                 'Failed to fetch second response',

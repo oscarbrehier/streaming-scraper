@@ -1,5 +1,6 @@
 import fetch from 'node-fetch';
 import { ErrorObject } from '../../helpers/ErrorObject.js';
+import { proxiedFetch } from '../../helpers/proxiedFetch.js';
 
 //TODO: not finished yet... check: https://github.com/Gujal00/ResolveURL/blob/master/script.module.resolveurl/lib/resolveurl/plugins/streamtape.py
 
@@ -7,7 +8,7 @@ export async function extract_streamtape(url) {
     try {
         let hostname = url.match(/https?:\/\/([^\/]+)/)[1];
 
-        const response = await fetch(url, {
+        const response = await proxiedFetch(url, {
             headers: {
                 'User-Agent':
                     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/y130.0.0.0 Safari/537.36',

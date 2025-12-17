@@ -1,6 +1,7 @@
 import fetch from 'node-fetch';
 import { languageMap } from '../../../utils/languages.js';
 import { ErrorObject } from '../../../helpers/ErrorObject.js';
+import { proxiedFetch } from '../../../helpers/proxiedFetch.js';
 
 const DOMAIN = 'https://embed.su';
 const headers = {
@@ -20,7 +21,7 @@ export async function getEmbedsu(media) {
             s && e
                 ? `${DOMAIN}/embed/tv/${tmdb_id}/${s}/${e}`
                 : `${DOMAIN}/embed/movie/${tmdb_id}`;
-        const htmlSearch = await fetch(urlSearch, { headers });
+        const htmlSearch = await proxiedFetch(urlSearch, { headers });
         if (!htmlSearch.ok)
             return new ErrorObject(
                 'Embed page structure has changed or is down',
@@ -84,7 +85,7 @@ export async function getEmbedsu(media) {
 
             const urlDirect = `${DOMAIN}/api/e/${item.hash}`;
 
-            let dataDirect = await fetch(urlDirect, {
+            let dataDirect = await proxiedFetch(urlDirect, {
                 headers: {
                     Referer: DOMAIN,
                     'User-Agent': headers['User-Agent'],

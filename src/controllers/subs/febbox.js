@@ -1,3 +1,4 @@
+import { proxiedFetch } from '../../helpers/proxiedFetch.js';
 import { languageMap } from '../../utils/languages.js';
 
 export async function getFebbox(media) {
@@ -9,7 +10,7 @@ export async function getFebbox(media) {
     } else {
         url = `${DOMAIN}tv/${media.imdb}/${media.season}/${media.episode}`;
     }
-    let request = await fetch(url);
+    let request = await proxiedFetch(url);
 
     let subs_with_dif_format = await request.json();
 

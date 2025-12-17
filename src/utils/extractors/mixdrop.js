@@ -1,10 +1,11 @@
 import fetch from 'node-fetch';
 import { ErrorObject } from '../../helpers/ErrorObject.js';
+import { proxiedFetch } from '../../helpers/proxiedFetch.js';
 
 export const extract_mixdrop = async (id) => {
     try {
         // Use the correct domain
-        const resp = await fetch('https://mixdrop.ag/e/' + id);
+        const resp = await proxiedFetch('https://mixdrop.ag/e/' + id);
 
         // Get cookies
         const cookieHeader = resp.headers.get('set-cookie');

@@ -1,6 +1,7 @@
 import fetch from 'node-fetch';
 import * as cheerio from 'cheerio';
 import { ErrorObject } from '../../helpers/ErrorObject.js';
+import { proxiedFetch } from '../../helpers/proxiedFetch.js';
 
 // Special Mention to:
 // https://github.com/Gujal00/ResolveURL/blob/master/script.module.resolveurl/lib/resolveurl/plugins/filelions.py
@@ -65,7 +66,7 @@ export async function extract_filelions(url) {
         }
 
         // fetch the embed page
-        const response = await fetch(embedUrl, { headers });
+        const response = await proxiedFetch(embedUrl, { headers });
 
         if (!response.ok) {
             return new ErrorObject(

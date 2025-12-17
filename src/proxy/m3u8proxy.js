@@ -2,6 +2,7 @@
 import fetch from 'node-fetch';
 import { DEFAULT_USER_AGENT } from './proxyserver.js';
 import { generateSignedURL } from '../helpers/urls.js';
+import { proxiedFetch } from '../helpers/proxiedFetch.js';
 
 export async function proxyM3U8(targetUrl, headers, res, serverUrl) {
     try {
@@ -16,7 +17,7 @@ export async function proxyM3U8(targetUrl, headers, res, serverUrl) {
             return;
         }
 
-        const response = await fetch(targetUrl, {
+        const response = await proxiedFetch(targetUrl, {
             headers: {
                 'User-Agent': DEFAULT_USER_AGENT,
                 ...headers

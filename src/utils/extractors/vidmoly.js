@@ -1,4 +1,5 @@
 import { ErrorObject } from '../../helpers/ErrorObject.js';
+import { proxiedFetch } from '../../helpers/proxiedFetch.js';
 // Special Thanks to
 // https://github.com/Gujal00/ResolveURL/blob/master/script.module.resolveurl/lib/resolveurl/plugins/vidmoly.py
 
@@ -34,7 +35,7 @@ export async function extract_vidmoly(url) {
         };
 
         // Fetch the embed page
-        const response = await fetch(webUrl, { headers });
+        const response = await proxiedFetch(webUrl, { headers });
         if (!response.ok) {
             return new ErrorObject(
                 'Fetch failed',

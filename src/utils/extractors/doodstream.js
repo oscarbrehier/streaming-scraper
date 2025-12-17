@@ -1,5 +1,6 @@
 import fetch from 'node-fetch';
 import { ErrorObject } from '../../helpers/ErrorObject.js';
+import { proxiedFetch } from '../../helpers/proxiedFetch.js';
 
 // special mention to
 // special mention to
@@ -41,7 +42,7 @@ export async function extract_doodstream(url) {
         };
 
         // fetch initial page
-        let response = await fetch(webUrl, {
+        let response = await proxiedFetch(webUrl, {
             headers,
             redirect: 'follow'
         });
@@ -76,7 +77,7 @@ export async function extract_doodstream(url) {
         if (iframeMatch) {
             const iframeUrl = `https://${host}${iframeMatch[1]}`;
 
-            response = await fetch(iframeUrl, { headers });
+            response = await proxiedFetch(iframeUrl, { headers });
 
             if (!response.ok) {
                 return new ErrorObject(
@@ -93,7 +94,7 @@ export async function extract_doodstream(url) {
             // try /e/ endpoint if no iframe is found
             const embedUrl = `https://${host}/e/${mediaId}`;
 
-            response = await fetch(embedUrl, { headers });
+            response = await proxiedFetch(embedUrl, { headers });
 
             if (!response.ok) {
                 return new ErrorObject(
@@ -129,7 +130,7 @@ export async function extract_doodstream(url) {
         // fetch the source url
         const sourceUrl = `https://${host}${sourcePath}`;
 
-        const sourceResponse = await fetch(sourceUrl, { headers });
+        const sourceResponse = await proxiedFetch(sourceUrl, { headers });
 
         if (!sourceResponse.ok) {
             return new ErrorObject(
