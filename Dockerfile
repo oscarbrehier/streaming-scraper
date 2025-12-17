@@ -1,8 +1,8 @@
 # Use the official Node image
-FROM node:18-alpine
+FROM node:22-bookworm
 
 # Set working directory
-WORKDIR /
+WORKDIR /app
 
 # Copy dependencies files
 COPY package*.json ./
@@ -14,12 +14,12 @@ RUN npm install
 COPY . .
 
 # Expose port
-ARG PORT=3000
+ARG PORT=3002
 ENV PORT=${PORT}
 EXPOSE ${PORT}
 
 # Add api key
-ENV TMDB_API_KEY=your_api_key_here
+ENV TMDB_API_KEY=fad0add69fc5edb25943409f9e059ce6
 
 # Start the app
 CMD ["npm", "deploy"]
