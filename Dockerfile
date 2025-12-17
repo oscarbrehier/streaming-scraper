@@ -22,4 +22,4 @@ EXPOSE ${PORT}
 ENV TMDB_API_KEY=fad0add69fc5edb25943409f9e059ce6
 
 # Start the app
-CMD ["npm", "deploy"]
+CMD ["npm", "run", "deploy"]
