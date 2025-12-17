@@ -10,6 +10,6 @@ export async function proxiedFetch(url, options = {}) {
 	proxyUrl.searchParams.append('url', url);
 
 	console.log('[proxiedFetch] Fetching via proxy:', proxyUrl.toString());
-	return nodeproxiedFetch(proxyUrl.toString(), options);
+	return nodeFetch(proxyUrl.toString(), options);
 
 };
