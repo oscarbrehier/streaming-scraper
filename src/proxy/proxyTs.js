@@ -4,6 +4,17 @@ import { DEFAULT_USER_AGENT } from './proxyserver.js';
 
 export async function proxyTs(targetUrl, headers, req, res) {
     try {
+
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Access-Control-Allow-Headers', '*');
+        res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
+
+        if (req.method === "OPTIONS") {
+            res.writeHead(204);
+            res.end();
+            return;
+        }
+
         // Handle range requests for video playback
         const fetchHeaders = {
             'User-Agent': DEFAULT_USER_AGENT,
@@ -24,6 +35,8 @@ export async function proxyTs(targetUrl, headers, req, res) {
             res.end(`TS fetch failed: ${response.status}`);
             return;
         }
+
+        res.setHeader("Content-Type", "video/mp2t");
 
         // Set response headers
         const contentType =
@@ -49,6 +62,8 @@ export async function proxyTs(targetUrl, headers, req, res) {
                 response.headers.get('accept-ranges')
             );
         }
+
+        res.setHeader('Accept-Ranges', 'bytes');
 
         // Set status code for range requests
         if (response.status === 206) {
