@@ -1,52 +1,40 @@
 import express from 'express';
-import { scrapeMedia } from './src/api.js';
-import {
-    createProxyRoutes,
-    processApiResponse
-} from './src/proxy/proxyserver.js';
-import { getMovieFromTmdb, getTvFromTmdb } from './src/helpers/tmdb.js';
-import cors from 'cors';
 import { strings } from './src/strings.js';
-import {
-    checkIfPossibleTmdbId,
-    handleErrorResponse
-} from './src/helpers/helper.js';
+import { handleErrorResponse } from './src/helpers/helper.js';
 import { ErrorObject } from './src/helpers/ErrorObject.js';
 import { getCacheStats } from './src/cache/cache.js';
 import { startup } from './src/utils/startup.js';
 import { authMiddleware } from "./src/middleware/auth.js";
+import { createCorsMiddleware } from './src/middleware/cors.js';
+
+import proxyRoutes from "./src/routes/proxy.js";
+import movieRoutes from "./src/routes/movie.js";
+import tvRoutes from "./src/routes/tv.js";
 
 const PORT = process.env.PORT || 3002;
 
 const parseAllowedOrigins = (allowedOrigins) => {
+
     if (!allowedOrigins) return [];
+
     const stripped = allowedOrigins.trim().replace(/^\[|\]$/g, '');
+
     return stripped
         .split(',')
         .map((s) => s.trim().replace(/^\"|\"$|^\'|\'$/g, ''))
         .filter(Boolean);
+
 };
 
 const allowedOrigins = parseAllowedOrigins(process.env.ALLOWED_ORIGINS) || [];
+
 const app = express();
 
-app.use(
-    cors({
-        origin: (origin, callback) => {
-            if (
-                !origin ||
-                allowedOrigins.some((o) => origin.includes(o)) ||
-                /^http:\/\/localhost/.test(origin)
-            ) {
-                callback(null, true);
-            } else {
-                callback(new Error('Not allowed by CORS'));
-            }
-        }
-    })
-);
+app.use(createCorsMiddleware(allowedOrigins));
 
-createProxyRoutes(app);
+app.use("", proxyRoutes);
+app.use("/movie", movieRoutes);
+app.use("/tv", tvRoutes);
 
 app.get('/', (req, res) => {
     res.status(200).json({
@@ -56,112 +44,6 @@ app.get('/', (req, res) => {
         license: strings.LICENSE,
         source: strings.SOURCE
     });
-});
-
-app.get('/movie/:tmdbId', authMiddleware, async (req, res) => {
-    if (!checkIfPossibleTmdbId(req.params.tmdbId)) {
-        return handleErrorResponse(
-            res,
-            new ErrorObject(
-                strings.INVALID_MOVIE_ID,
-                'user',
-                405,
-                strings.INVALID_MOVIE_ID_HINT,
-                true,
-                false
-            )
-        );
-    }
-
-    const media = await getMovieFromTmdb(req.params.tmdbId);
-
-    if (media instanceof ErrorObject) {
-        return handleErrorResponse(res, media);
-    }
-
-    const output = await scrapeMedia(media);
-
-    if (output instanceof ErrorObject) {
-        return handleErrorResponse(res, output);
-    }
-
-    console.log('Scraper output files:', JSON.stringify(output.files, null, 2));
-
-    const BASE_URL =
-        process.env.BASE_URL || `${req.protocol}://${req.get('host')}`;
-    const processedOutput = processApiResponse(output, BASE_URL);
-
-    res.status(200).json(processedOutput);
-});
-
-app.get('/tv/:tmdbId', authMiddleware, async (req, res) => {
-    if (
-        !checkIfPossibleTmdbId(req.params.tmdbId) ||
-        !checkIfPossibleTmdbId(req.query.s) ||
-        !checkIfPossibleTmdbId(req.query.e)
-    ) {
-        return handleErrorResponse(
-            res,
-            new ErrorObject(
-                strings.INVALID_TV_ID,
-                'user',
-                405,
-                strings.INVALID_TV_ID_HINT,
-                true,
-                false
-            )
-        );
-    }
-
-    const media = await getTvFromTmdb(
-        req.params.tmdbId,
-        req.query.s,
-        req.query.e
-    );
-
-    if (media instanceof ErrorObject) {
-        return handleErrorResponse(res, media);
-    }
-
-    const output = await scrapeMedia(media);
-
-    if (output instanceof ErrorObject) {
-        return handleErrorResponse(res, output);
-    }
-
-    const BASE_URL =
-        process.env.BASE_URL || `${req.protocol}://${req.get('host')}`;
-    const processedOutput = processApiResponse(output, BASE_URL);
-
-    res.status(200).json(processedOutput);
-});
-
-app.get('/movie/', (req, res) => {
-    handleErrorResponse(
-        res,
-        new ErrorObject(
-            strings.INVALID_MOVIE_ID,
-            'user',
-            405,
-            strings.INVALID_MOVIE_ID_HINT,
-            true,
-            false
-        )
-    );
-});
-
-app.get('/tv/', (req, res) => {
-    handleErrorResponse(
-        res,
-        new ErrorObject(
-            strings.INVALID_TV_ID,
-            'user',
-            405,
-            strings.INVALID_TV_ID_HINT,
-            true,
-            false
-        )
-    );
 });
 
 app.get('/cache-stats', authMiddleware, (req, res) => {

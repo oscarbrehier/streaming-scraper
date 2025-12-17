@@ -1,6 +1,6 @@
 // TS/Segment proxy function based on the working implementation
 import fetch from 'node-fetch';
-import { DEFAULT_USER_AGENT } from './proxyserver.js';
+import { DEFAULT_USER_AGENT } from '../routes/proxy.js';
 import { proxiedFetch } from '../helpers/proxiedFetch.js';
 
 export async function proxyTs(targetUrl, headers, req, res) {
