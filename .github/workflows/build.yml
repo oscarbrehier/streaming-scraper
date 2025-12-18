@@ -11,6 +11,17 @@ jobs:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v1
       - run: bun install
+      
+      - name: Create .env file
+        run: |
+          echo "PORT=${{ secrets.PORT }}" >> .env
+          echo "ALLOWED_ORIGINS=${{ secrets.ALLOWED_ORIGINS }}" >> .env
+          echo "BASE_URL=${{ secrets.BASE_URL }}" >> .env
+          echo "SCRAPER_API_KEY=${{ secrets.SCRAPER_API_KEY }}" >> .env
+          echo "SCRAPER_SECRET=${{ secrets.SCRAPER_SECRET }}" >> .env
+          echo "TMDB_API_KEY=${{ secrets.TMDB_API_KEY }}" >> .env
+        shell: bash
+      
       - name: Build
         run: |
           if [ "$RUNNER_OS" == "Windows" ]; then
@@ -19,6 +30,7 @@ jobs:
             bun build src/index.js --compile --outfile streaming-scraper
           fi
         shell: bash
+        
       - uses: actions/upload-artifact@v4
         with:
           name: streaming-scraper-${{ matrix.os }}
