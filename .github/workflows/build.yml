@@ -14,7 +14,6 @@ jobs:
       
       - name: Inject environment variables into code
         run: |
-          run: |
           cat > src/config.js << EOF
           const config = {
             PORT: '${{ secrets.PORT }}',
