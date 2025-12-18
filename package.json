@@ -1,13 +1,19 @@
 {
     "name": "streaming-scraper",
     "version": "1.0.2",
-    "main": "index.js",
+    "main": "./src/index.js",
+    "exports": {
+        ".": "./src/index.js"
+    },
     "type": "module",
     "scripts": {
-        "dev": "node --watch index.js --debug",
-        "main": "node --watch index.js",
-        "deploy": "node --watch index.js",
-        "start": "node --watch index.js"
+        "dev": "node --watch ./src/index.js --debug",
+        "main": "node --watch ./src/index.js",
+        "deploy": "node --watch ./src/index.js",
+        "start": "node --watch ./src/index.js",
+        "build:win": "bun build src/index.js --compile --outfile ./dist/scraper --target=bun-windows-x64",
+        "build:mac": "bun build src/index.js --compile --outfile dist/streaming-scraper --target=bun-darwin-x64",
+        "build:linux": "bun build src/index.js --compile --outfile dist/streaming-scraper --target=bun-linux-x64"
     },
     "dependencies": {
         "axios": "^1.13.2",
@@ -24,5 +30,8 @@
         "prettier": "^3.7.3",
         "unpacker": "^1.0.1",
         "wyzie-lib": "^2.2.5"
+    },
+    "devDependencies": {
+        "pkgroll": "^2.21.4"
     }
 }
