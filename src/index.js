@@ -10,23 +10,11 @@ import { createCorsMiddleware } from './middleware/cors.js';
 import proxyRoutes from "./routes/proxy.js";
 import movieRoutes from "./routes/movie.js";
 import tvRoutes from "./routes/tv.js";
+import config from './config.js';
 
-const PORT = process.env.PORT || 3002;
+const PORT = config.PORT;
 
-const parseAllowedOrigins = (allowedOrigins) => {
-
-    if (!allowedOrigins) return [];
-
-    const stripped = allowedOrigins.trim().replace(/^\[|\]$/g, '');
-
-    return stripped
-        .split(',')
-        .map((s) => s.trim().replace(/^\"|\"$|^\'|\'$/g, ''))
-        .filter(Boolean);
-
-};
-
-const allowedOrigins = parseAllowedOrigins(process.env.ALLOWED_ORIGINS) || [];
+const allowedOrigins = config.ALLOWED_ORIGINS;
 
 const app = express();
 

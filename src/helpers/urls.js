@@ -1,7 +1,8 @@
 import 'dotenv/config';
 import jwt from "jsonwebtoken";
+import config from '../config.js';
 
-const SECRET = process.env.SCRAPER_SECRET;
+const SECRET = config.SCRAPER_SECRET;
 
 /**
  * Generate a signed URL with a JWT token appended as query parameter.

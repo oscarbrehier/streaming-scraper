@@ -1,9 +1,10 @@
 import 'dotenv/config';
 import jwt from 'jsonwebtoken';
+import config from '../config.js';
 
-const SECRET = process.env.SCRAPER_SECRET;
-const API_KEY = process.env.SCRAPER_API_KEY;
-const BASE_URL = process.env.BASE_URL || 'http://localhost:3002';
+const SECRET = config.SCRAPER_SECRET;
+const API_KEY = config.SCRAPER_API_KEY;
+const BASE_URL = config.BASE_URL;
 
 // Helper to properly decode query values
 function decodeQueryString(str) {

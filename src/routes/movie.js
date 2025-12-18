@@ -6,6 +6,7 @@ import { processApiResponse } from '../proxy/proxyserver.js';
 import { handleErrorResponse, checkIfPossibleTmdbId } from '../helpers/helper.js';
 import { ErrorObject } from '../helpers/ErrorObject.js';
 import { strings } from '../strings.js';
+import config from '../config.js';
 
 const router = Router();
 
@@ -39,7 +40,7 @@ router.get('/:tmdbId', authMiddleware, async (req, res) => {
 	console.log('Scraper output files:', JSON.stringify(output.files, null, 2));
 
 	const BASE_URL =
-		process.env.BASE_URL || `${req.protocol}://${req.get('host')}`;
+		config.BASE_URL || `${req.protocol}://${req.get('host')}`;
 	const processedOutput = processApiResponse(output, BASE_URL);
 
 	res.status(200).json(processedOutput);

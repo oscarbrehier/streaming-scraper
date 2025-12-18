@@ -1,9 +1,10 @@
+import config from '../config.js';
 import { ErrorObject } from '../helpers/ErrorObject.js';
 
 export function startup() {
     // check required env keys
     const TMDB_API_KEY =
-        process.env.TMDB_API_KEY ||
+        config.TMDB_API_KEY ||
         (() => {
             throw new ErrorObject(
                 'Missing TMDB_API_KEY environment variable',
@@ -15,7 +16,7 @@ export function startup() {
             );
         });
 
-    const PORT = process.env.PORT;
+    const PORT = config.PORT;
     if (!PORT) {
         throw new ErrorObject(
             'Missing PORT environment variable',

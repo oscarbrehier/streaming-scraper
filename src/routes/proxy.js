@@ -4,13 +4,14 @@ import { proxiedFetch } from '../helpers/proxiedFetch.js';
 import { authMiddleware, validateSignedToken } from '../middleware/auth.js';
 import { handleCors } from '../proxy/handleCors.js';
 import { Router } from "express";
+import config from "../config.js";
 
 const router = Router();
 
 // Default user agent
 export const DEFAULT_USER_AGENT =
 	'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
-const BASE_URL = process.env.BASE_URL || 'http://localhost:3002';
+const BASE_URL = config.BASE_URL;
 
 // Test endpoint to verify proxy is working
 router.get('/proxy/status', authMiddleware, (req, res) => {
