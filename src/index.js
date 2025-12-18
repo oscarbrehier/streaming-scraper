@@ -1,15 +1,15 @@
 import express from 'express';
-import { strings } from './src/strings.js';
-import { handleErrorResponse } from './src/helpers/helper.js';
-import { ErrorObject } from './src/helpers/ErrorObject.js';
-import { getCacheStats } from './src/cache/cache.js';
-import { startup } from './src/utils/startup.js';
-import { authMiddleware } from "./src/middleware/auth.js";
-import { createCorsMiddleware } from './src/middleware/cors.js';
+import { strings } from './strings.js';
+import { handleErrorResponse } from './helpers/helper.js';
+import { ErrorObject } from './helpers/ErrorObject.js';
+import { getCacheStats } from './cache/cache.js';
+import { startup } from './utils/startup.js';
+import { authMiddleware } from "./middleware/auth.js";
+import { createCorsMiddleware } from './middleware/cors.js';
 
-import proxyRoutes from "./src/routes/proxy.js";
-import movieRoutes from "./src/routes/movie.js";
-import tvRoutes from "./src/routes/tv.js";
+import proxyRoutes from "./routes/proxy.js";
+import movieRoutes from "./routes/movie.js";
+import tvRoutes from "./routes/tv.js";
 
 const PORT = process.env.PORT || 3002;
 

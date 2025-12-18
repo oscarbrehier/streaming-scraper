@@ -1,5 +1,4 @@
-import fetch from 'node-fetch';
-import * as crypto from 'node:crypto';
+import * as crypto from 'crypto';
 import { ErrorObject } from '../../../helpers/ErrorObject.js';
 import { proxiedFetch } from '../../../helpers/proxiedFetch.js';
 
