@@ -12,14 +12,20 @@ jobs:
       - uses: oven-sh/setup-bun@v1
       - run: bun install
       
-      - name: Create .env file
+      - name: Inject environment variables into code
         run: |
-          echo "PORT=${{ secrets.PORT }}" >> .env
-          echo "ALLOWED_ORIGINS=${{ secrets.ALLOWED_ORIGINS }}" >> .env
-          echo "BASE_URL=${{ secrets.BASE_URL }}" >> .env
-          echo "SCRAPER_API_KEY=${{ secrets.SCRAPER_API_KEY }}" >> .env
-          echo "SCRAPER_SECRET=${{ secrets.SCRAPER_SECRET }}" >> .env
-          echo "TMDB_API_KEY=${{ secrets.TMDB_API_KEY }}" >> .env
+          run: |
+          cat > src/config.js << EOF
+          const config = {
+            PORT: '${{ secrets.PORT }}',
+            ALLOWED_ORIGINS: ${{ secrets.ALLOWED_ORIGINS }},
+            BASE_URL: '${{ secrets.BASE_URL }}',
+            SCRAPER_API_KEY: '${{ secrets.SCRAPER_API_KEY }}',
+            SCRAPER_SECRET: '${{ secrets.SCRAPER_SECRET }}',
+            TMDB_API_KEY: '${{ secrets.TMDB_API_KEY }}',
+          };
+          export default config;
+          EOF
         shell: bash
       
       - name: Build

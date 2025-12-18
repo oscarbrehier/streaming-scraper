@@ -1,9 +1,10 @@
 import dotenv from 'dotenv';
 import { strings } from '../strings.js';
 import { ErrorObject } from './ErrorObject.js';
+import config from '../config.js';
 
 dotenv.config();
-const apiKey = process.env.TMDB_API_KEY;
+const apiKey = config.TMDB_API_KEY;
 
 /**
  * Fetches movie information from TMDB API using the movie ID

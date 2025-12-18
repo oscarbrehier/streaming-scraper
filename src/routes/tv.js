@@ -6,6 +6,7 @@ import { strings } from '../strings.js';
 import { checkIfPossibleTmdbId, handleErrorResponse } from '../helpers/helper.js';
 import { ErrorObject } from '../helpers/ErrorObject.js';
 import { authMiddleware } from "../middleware/auth.js";
+import config from '../config.js';
 
 const router = Router();
 
@@ -45,7 +46,7 @@ router.get('/:tmdbId', authMiddleware, async (req, res) => {
 	}
 
 	const BASE_URL =
-		process.env.BASE_URL || `${req.protocol}://${req.get('host')}`;
+		config.BASE_URL || `${req.protocol}://${req.get('host')}`;
 	const processedOutput = processApiResponse(output, BASE_URL);
 
 	res.status(200).json(processedOutput);
