@@ -1,5 +1,5 @@
 import fetch from 'node-fetch';
-import { httpsAgent } from './http';
+import { httpsAgent } from './http.js';
 
 export async function proxiedFetch(url, options = {}) {
 	return fetch(url, {
