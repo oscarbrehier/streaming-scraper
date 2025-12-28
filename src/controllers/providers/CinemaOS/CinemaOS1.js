@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { http } from '../../../helpers/http.js';
 import crypto from 'crypto';
 import { ErrorObject } from '../../../helpers/ErrorObject.js';
 import * as cheerio from 'cheerio';
@@ -29,7 +29,7 @@ export async function getCinemaOS(params) {
         const movieUrl = `${BASE_URL}/movie/${tmdb}`;
         console.log('CinemaOS: Fetching page:', movieUrl);
 
-        const pageResponse = await axios.get(movieUrl, {
+        const pageResponse = await http.get(movieUrl, {
             headers,
             timeout: 30000,
             maxRedirects: 5

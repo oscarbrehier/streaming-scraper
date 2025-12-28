@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { http } from '../../../helpers/http.js';
 import * as cheerio from 'cheerio';
 import * as crypto from 'crypto';
 import fetch from 'node-fetch';
@@ -66,7 +66,7 @@ async function lookupPage(info) {
     const ds = sha1Hex(`${imdbId}${DS_KEY}`).slice(0, 10);
 
     try {
-        const response = await axios.get(`${URL}/filter`, {
+        const response = await http.get(`${URL}/filter`, {
             params: { s: imdbId, ds }
         });
         const $ = cheerio.load(response.data);
@@ -867,7 +867,7 @@ async function fromPrimewireToProvider(primwireObject) {
 
     try {
         // Step 1: Fetch the initial redirect page
-        const response = await axios.get(primwireObject.url, {
+        const response = await http.get(primwireObject.url, {
             maxRedirects: 5,
             validateStatus: function (status) {
                 return status >= 200 && status < 400;
@@ -932,7 +932,7 @@ async function fromPrimewireToProvider(primwireObject) {
         const jsUrl = `https://primewire.tf/js/app-${javascriptfile}.js`;
         // console.log(`[Primewire Debug] Fetching: ${jsUrl}`);
 
-        const jsfiledata = await axios.get(jsUrl, {
+        const jsfiledata = await http.get(jsUrl, {
             headers: {
                 'User-Agent':
                     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
@@ -980,7 +980,7 @@ async function fromPrimewireToProvider(primwireObject) {
 
         let mediaobject;
         try {
-            mediaobject = await axios.get(mediaUrl, {
+            mediaobject = await http.get(mediaUrl, {
                 params: {
                     token: token,
                     embed: 'true'
@@ -995,7 +995,7 @@ async function fromPrimewireToProvider(primwireObject) {
             // console.log(
             //     `[Primewire] Embed endpoint failed (${embedError.response?.status}), trying without embed`
             // );
-            mediaobject = await axios.get(mediaUrl, {
+            mediaobject = await http.get(mediaUrl, {
                 params: {
                     token: token
                 },

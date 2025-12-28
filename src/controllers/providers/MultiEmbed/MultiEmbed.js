@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { http } from '../../../helpers/http.js';
 import * as cheerio from 'cheerio';
 import { URL } from 'url';
 import { ErrorObject } from '../../../helpers/ErrorObject.js';
@@ -65,7 +65,7 @@ export async function getMultiembed(params) {
 
     try {
         if (baseUrl.includes('multiembed')) {
-            const resolved = await axios.get(baseUrl, { headers });
+            const resolved = await http.get(baseUrl, { headers });
             baseUrl = resolved.request.res.responseUrl || baseUrl;
         }
 
@@ -77,14 +77,14 @@ export async function getMultiembed(params) {
             'button-referer': ''
         };
 
-        const resp1 = await axios.post(baseUrl, new URLSearchParams(data), {
+        const resp1 = await http.post(baseUrl, new URLSearchParams(data), {
             headers
         });
         const tokenMatch = resp1.data.match(/load_sources\(\"(.*?)\"\)/);
         if (!tokenMatch) throw new Error('Token not found');
         const token = tokenMatch[1];
 
-        const resp2 = await axios.post(
+        const resp2 = await http.post(
             'https://streamingnow.mov/response.php',
             new URLSearchParams({ token }),
             { headers }
@@ -106,7 +106,7 @@ export async function getMultiembed(params) {
         const videoId = vipSource.attr('data-id');
 
         const vipUrl = `https://streamingnow.mov/playvideo.php?video_id=${videoId}&server_id=${serverId}&token=${token}&init=1`;
-        const resp3 = await axios.get(vipUrl, { headers });
+        const resp3 = await http.get(vipUrl, { headers });
         const $2 = cheerio.load(resp3.data);
         let iframeUrl = $2('iframe.source-frame.show').attr('src');
 
@@ -121,7 +121,7 @@ export async function getMultiembed(params) {
             );
         }
 
-        const resp4 = await axios.get(iframeUrl, { headers });
+        const resp4 = await http.get(iframeUrl, { headers });
 
         // Try hunter pack first
         const hunterMatch = resp4.data.match(

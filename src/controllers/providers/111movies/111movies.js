@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { http } from "../../../helpers/http.js";
 import crypto from 'crypto';
 import { ErrorObject } from '../../../helpers/ErrorObject.js';
 
@@ -51,7 +51,7 @@ export async function get111Movies(params) {
     try {
         // Fetch page
         console.log(pageUrl);
-        const res = await axios.get(pageUrl, {
+        const res = await http.get(pageUrl, {
             headers: {
                 'User-Agent': userAgent,
                 Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
@@ -97,13 +97,13 @@ export async function get111Movies(params) {
             '7ae59bfb/zac/g/APA912UWa5x0rMiGGcNeljgP7t8jA2Rt6lmnqqlv9r-5R9IjA_kbxjGxmWzw23y5WukwjDEAX0UDWlcUeJD-buSc0fwrRH8zieg0PuZJpqXbhUUCMuQCFS1zVPhlSHTkCyDHyolJ-9tBOOGgmIMKsVJRKAHG66Z44BMb9vWN6ByRjF-8vD6v1u1';
         const apiServers = `${DOMAIN}/${staticPath}/${encodedFinal}/sr`;
 
-        const serversRes = await axios.post(apiServers, {}, { headers });
+        const serversRes = await http.post(apiServers, {}, { headers });
         const servers = serversRes.data;
 
         const server = servers[Math.floor(Math.random() * servers.length)].data;
         const apiStream = `${DOMAIN}/${staticPath}/${server}`;
 
-        const streamRes = await axios.post(apiStream, {}, { headers });
+        const streamRes = await http.post(apiStream, {}, { headers });
 
         return {
             files: {

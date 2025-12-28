@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { http } from '../../../helpers/http.js';
 import { atob, Buffer } from 'buffer';
 import { URL } from 'url';
 import base64 from 'base-64';
@@ -23,7 +23,7 @@ export async function getVidSrc(media) {
     console.log('[VidSrc] Starting with URL:', url);
     console.log('[VidSrc] Media object:', JSON.stringify(media));
 
-    const client = axios.create();
+    const client = http.create();
 
     try {
         console.log('[VidSrc] Fetching first iframe from:', url);
@@ -96,8 +96,8 @@ export async function getVidSrc(media) {
 
         let iframeHtml3;
         try {
-            // Try normal axios first (fastest)
-            console.log('[VidSrc] Attempting to fetch third iframe with axios');
+            // Try normal http first (fastest)
+            console.log('[VidSrc] Attempting to fetch third iframe with http');
             iframeHtml3 = (
                 await client.get(thirdUrl, {
                     headers: {
@@ -108,7 +108,7 @@ export async function getVidSrc(media) {
                 })
             ).data;
             console.log(
-                '[VidSrc] Successfully fetched third iframe with axios'
+                '[VidSrc] Successfully fetched third iframe with http'
             );
         } catch (err) {
             console.log('[VidSrc] Axios failed, error:', err.message);

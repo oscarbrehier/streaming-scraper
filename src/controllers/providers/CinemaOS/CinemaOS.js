@@ -1,6 +1,6 @@
-import axios from 'axios';
 import crypto from 'crypto';
 import { ErrorObject } from '../../../helpers/ErrorObject.js';
+import { http } from '../../../helpers/http.js';
 
 const BASE_URL = 'https://cinemaos.live';
 const USER_AGENT =
@@ -21,7 +21,7 @@ export async function getCinemaOS(params) {
         const downloadUrl = `${BASE_URL}/api/downloadLinks?type=movie&tmdbId=${tmdb}`;
         console.log('CinemaOS: Requesting metadata from:', downloadUrl);
 
-        const downloadData = (await axios.get(downloadUrl, { headers })).data
+        const downloadData = (await http.get(downloadUrl, { headers })).data
             .data[0];
 
         console.log(
@@ -73,7 +73,7 @@ export async function getCinemaOS(params) {
         };
 
         const encResponse = (
-            await axios.get(cinemaUrl, {
+            await http.get(cinemaUrl, {
                 headers: cinemaHeaders,
                 timeout: 30000
             })
