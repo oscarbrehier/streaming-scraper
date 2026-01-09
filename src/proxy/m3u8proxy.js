@@ -4,6 +4,7 @@ import { DEFAULT_USER_AGENT } from '../routes/proxy.js';
 import { proxiedFetch } from '../helpers/proxiedFetch.js';
 
 export async function proxyM3U8(targetUrl, headers, res, serverUrl) {
+
     try {
 
         res.setHeader('Access-Control-Allow-Origin', '*');
@@ -35,12 +36,11 @@ export async function proxyM3U8(targetUrl, headers, res, serverUrl) {
         const processedLines = m3u8Content.split('\n').map((line) => {
             line = line.trim();
 
-            // Skip empty lines and comments (except special ones)
-            if (!line || (line.startsWith('#') && !line.includes('URI='))) {
-                return line;
-            }
+            if (!line) return null; // skip empty
+            if (line.startsWith('#EXT-X-I-FRAME-STREAM-')) return null; // remove I-frame lines
+            if (line.startsWith('#') && !line.includes('URI=')) return line; // keep other comments
 
-            // Handle URI in #EXT-X-MEDIA tags (for audio/subtitle tracks)
+            // Handle EXT-X-MEDIA URIs (audio/subs)
             if (line.startsWith('#EXT-X-MEDIA:') && line.includes('URI=')) {
                 const uriMatch = line.match(/URI="([^"]+)"/);
                 if (uriMatch) {
@@ -51,7 +51,7 @@ export async function proxyM3U8(targetUrl, headers, res, serverUrl) {
                 return line;
             }
 
-            // Handle encryption keys
+            // Handle EXT-X-KEY
             if (line.startsWith('#EXT-X-KEY:') && line.includes('URI=')) {
                 const uriMatch = line.match(/URI="([^"]+)"/);
                 if (uriMatch) {
@@ -62,29 +62,24 @@ export async function proxyM3U8(targetUrl, headers, res, serverUrl) {
                 return line;
             }
 
-            // Handle segment URLs (non-comment lines)
+            // Handle segments and nested m3u8 files
             if (!line.startsWith('#')) {
                 try {
-                    const segmentUrl = new URL(line, targetUrl).href;
+                    const cleanLine = line.split(',')[0].trim(); // remove trailing JSON/extra
+                    const segmentUrl = new URL(cleanLine, targetUrl).href;
 
-                    // Check if it's another m3u8 file (master playlist)
-                    if (line.includes('.m3u8') || line.includes('m3u8')) {
-                        const signedUrl = `${serverUrl}/m3u8-proxy?url=${encodeURIComponent(segmentUrl)}`;
-                        return signedUrl;
-                    } else {
-                        // It's a media segment
-                        const signedUrl = `${serverUrl}/ts-proxy?url=${encodeURIComponent(segmentUrl)}`;
-                        return signedUrl;
-                    }
+                    return segmentUrl.includes('.m3u8')
+                        ? `${serverUrl}/m3u8-proxy?url=${encodeURIComponent(segmentUrl)}`
+                        : `${serverUrl}/ts-proxy?url=${encodeURIComponent(segmentUrl)}`;
                 } catch (e) {
-                    return line; // Return original if URL parsing fails
+                    return null;
                 }
             }
 
             return line;
         });
 
-        const processedContent = processedLines.join('\n');
+        const processedContent = processedLines.filter(Boolean).join('\n');
 
         // Set proper headers
         res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
@@ -93,9 +88,13 @@ export async function proxyM3U8(targetUrl, headers, res, serverUrl) {
 
         res.writeHead(200);
         res.end(processedContent);
+
     } catch (error) {
+
         console.error('[M3U8 Proxy Error]:', error.message);
         res.writeHead(500);
         res.end(`M3U8 Proxy error: ${error.message}`);
-    }
-}
+
+    };
+    
+};
