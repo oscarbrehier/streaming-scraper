@@ -104,8 +104,16 @@ router.get('/proxy/hls', (req, res) => {
 	proxyM3U8(targetUrl, headers, res, BASE_URL);
 });
 
+router.options('/sub-proxy', (req, res) => {
+	res.header('Access-Control-Allow-Origin', '*');
+	res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
+	res.header('Access-Control-Allow-Headers', 'Content-Type');
+	res.sendStatus(200);
+});
+
 // Subtitle Proxy endpoint
 router.get('/sub-proxy', (req, res) => {
+
 	if (handleCors(req, res)) return;
 
 	const targetUrl = req.query.url;

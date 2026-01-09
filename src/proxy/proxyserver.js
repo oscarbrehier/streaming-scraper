@@ -80,7 +80,7 @@ export function processApiResponse(apiResponse, serverUrl) {
                 type,
                 headers: proxyHeaders
             };
-            
+
         })
         .filter(Boolean);
 
@@ -90,7 +90,7 @@ export function processApiResponse(apiResponse, serverUrl) {
 
         const id = crypto.randomUUID();
         const localProxyUrl = generateSignedURL(
-            `${serverUrl}/sub-proxy?url=${encodeURIComponent(sub.url)}`
+            `/sub-proxy?url=${encodeURIComponent(sub.url)}`
         );
 
         return {

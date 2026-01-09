@@ -44,13 +44,13 @@ export async function scrapeMedia(media) {
     const providers = [
         // WORKING
         { getTwoEmbed: () => getTwoEmbed(media) },
-        // { getAutoembed: () => getAutoembed(media) },
-        // { getVidSrcCC: () => getVidSrcCC(media) },
+        { getAutoembed: () => getAutoembed(media) },
+        { getVidSrcCC: () => getVidSrcCC(media) },
         { getVidSrc: () => getVidSrc(media) },
         { getVidrock: () => getVidRock(media) },
         { getMultiembed: () => getMultiembed(media) },
         // This seems to be intermittent i will need to look into it more. i have a hunch its rate limited.
-        // { getCinemaOS: () => getCinemaOS(media) },
+        { getCinemaOS: () => getCinemaOS(media) },
 
         // #### NOTE from Inside4ndroid : i have not looked at anything below this line yet!
 

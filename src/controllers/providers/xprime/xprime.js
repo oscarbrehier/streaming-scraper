@@ -2,7 +2,7 @@ import { ErrorObject } from '../../../helpers/ErrorObject.js';
 import { proxiedFetch } from '../../../helpers/proxiedFetch.js';
 import { languageMap } from '../../../utils/languages.js';
 
-const DOMAIN = 'https://xprime.tv/';
+const DOMAIN = 'https://xprime.today/';
 const BACKEND_DOMAIN = 'https://backend.xprime.tv/';
 
 export async function getXprime(media) {
