@@ -7,13 +7,13 @@
     },
     "type": "module",
     "scripts": {
-        "dev": "node --watch ./src/index.js --debug",
-        "main": "node --watch ./src/index.js",
-        "deploy": "node --watch ./src/index.js",
-        "start": "node --watch ./src/index.js",
-        "build:win": "bun build src/index.js --compile --outfile ./dist/scraper --target=bun-windows-x64",
-        "build:mac": "bun build src/index.js --compile --outfile dist/streaming-scraper --target=bun-darwin-x64",
-        "build:linux": "bun build src/index.js --compile --outfile dist/streaming-scraper --target=bun-linux-x64"
+        "dev": "bun --watch ./src/index.js --debug",
+        "main": "bun --watch ./src/index.js",
+        "deploy": "bun --watch ./src/index.js",
+        "start": "bun --watch ./src/index.js",
+        "build:win": "bun build src/index.js --compile --outfile ./dist/scraper --target=bun-windows-x64 --define process.argv=\"['--no-log']\"",
+        "build:mac": "bun build src/index.js --compile --outfile dist/streaming-scraper --target=bun-darwin-x64 --define process.argv=\"['--no-log']\"",
+        "build:linux": "bun build src/index.js --compile --outfile dist/streaming-scraper --target=bun-linux-x64 --define process.argv=\"['--no-log']\""
     },
     "dependencies": {
         "axios": "^1.13.2",

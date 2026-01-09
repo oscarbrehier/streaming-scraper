@@ -1,3 +1,4 @@
+import "./utils/console.js";
 import express from 'express';
 import { strings } from './strings.js';
 import { handleErrorResponse } from './helpers/helper.js';
@@ -61,12 +62,15 @@ app.get('/{*any}', (req, res) => {
 startup();
 
 app.listen(PORT, () => {
-    console.log(`Server is running on port http://localhost:${PORT}`);
-    if (process.argv.includes('--debug')) {
-        console.log(`Debug mode is enabled.`);
-        console.log('Cache is disabled.');
-    } else {
-        console.log('Debug mode is disabled.');
-        console.log('Cache is enabled.');
-    }
+
+    console.info(`Server is running on port http://localhost:${PORT}`);
+
+    const isDebugMode = process.argv.includes("--argv");
+    const loggingDisabled = process.argv.includes("--no-log") || process.env.NO_LOG === "true";
+
+    console.info(`Debug mode is ${isDebugMode ? "enabled" : "disabled"}`);
+    console.info(`Cache is ${isDebugMode ? "disabled" : "enabled"}`);
+
+    if (loggingDisabled) console.info("Console logs have been disabled");
+
 });
