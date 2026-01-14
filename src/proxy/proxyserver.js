@@ -12,7 +12,6 @@ export function processApiResponse(apiResponse, serverUrl) {
 
             if (!file.file || typeof file.file !== 'string') return null;
 
-            const id = crypto.randomUUID();
             let finalUrl = extractOriginalUrl(file.file);
             let proxyHeaders = file.headers || {};
 
@@ -75,7 +74,6 @@ export function processApiResponse(apiResponse, serverUrl) {
 
             return {
                 ...file,
-                id,
                 file: localProxyUrl,
                 type,
                 headers: proxyHeaders
@@ -88,14 +86,12 @@ export function processApiResponse(apiResponse, serverUrl) {
 
         if (!sub.url || typeof sub.url !== 'string') return null;
 
-        const id = crypto.randomUUID();
         const localProxyUrl = generateSignedURL(
             `/sub-proxy?url=${encodeURIComponent(sub.url)}`
         );
 
         return {
             ...sub,
-            id,
             url: localProxyUrl
         };
 

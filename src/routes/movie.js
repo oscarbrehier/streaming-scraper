@@ -7,6 +7,8 @@ import { handleErrorResponse, checkIfPossibleTmdbId } from '../helpers/helper.js
 import { ErrorObject } from '../helpers/ErrorObject.js';
 import { strings } from '../strings.js';
 import config from '../config.js';
+import { getLookmovie } from '../controllers/providers/lookmovie.js';
+import { getCacheKey, setToCache } from '../cache/cache.js';
 
 const router = Router();
 
@@ -25,7 +27,8 @@ router.get('/:tmdbId', authMiddleware, async (req, res) => {
 		);
 	}
 
-	const media = await getMovieFromTmdb(req.params.tmdbId);
+	const mediaId = req.params.tmdbId;
+	const media = await getMovieFromTmdb(mediaId);
 
 	if (media instanceof ErrorObject) {
 		return handleErrorResponse(res, media);
@@ -43,7 +46,10 @@ router.get('/:tmdbId', authMiddleware, async (req, res) => {
 		config.BASE_URL || `${req.protocol}://${req.get('host')}`;
 	const processedOutput = processApiResponse(output, BASE_URL);
 
+	await setToCache(`media-${mediaId}`, processedOutput);
+
 	res.status(200).json(processedOutput);
+
 });
 
 router.get('/', (req, res) => {

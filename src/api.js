@@ -10,47 +10,33 @@ import { getVidsrcWtf } from './controllers/providers/VidSrcWtf/VidSrcWtf.js';
 import { getVidZee } from './controllers/providers/VidZee/VidZee.js';
 import { getWyzie } from './controllers/subs/wyzie.js';
 import { getLibre } from './controllers/subs/libresubs.js';
-import { getCacheKey, getFromCache, setToCache } from './cache/cache.js';
+import { getCacheKey, setToCache } from './cache/cache.js';
 import { get111Movies } from './controllers/providers/111movies/111movies.js';
 import { getCinemaOS } from './controllers/providers/CinemaOS/CinemaOS.js';
 import { getMultiembed } from './controllers/providers/MultiEmbed/MultiEmbed.js';
+import { getLookmovie } from './controllers/providers/lookmovie.js';
 
 const shouldDebug = process.argv.includes('--debug');
 
 export async function scrapeMedia(media) {
-    // First thing - check if we already have this data cached (unless you're debugging and want fresh data)
-    const cacheKey = getCacheKey(media);
 
-    if (!shouldDebug) {
-        const cachedResult = getFromCache(cacheKey);
+    // const cacheKey = getCacheKey(media);
 
-        if (cachedResult) {
-            // Found it in cache, then we don't need to scrape again
-            if (shouldDebug) {
-                console.log(
-                    `[CACHE] Cache for ${cacheKey} - serving from memory instead of scraping`
-                );
-            }
-            return cachedResult;
-        }
-    }
-
-    // If no cache or bypassed, time to do the actual workkkk
-    if (shouldDebug) {
-        console.log(
-            `[CACHE] ${shouldDebug ? 'Cache bypassed' : 'No cache Found'} for ${cacheKey}, work starts now...`
-        );
-    }
     const providers = [
         // WORKING
+        { getLookmovie: () => getLookmovie(media) },
+
         { getTwoEmbed: () => getTwoEmbed(media) },
         { getAutoembed: () => getAutoembed(media) },
-        { getVidSrcCC: () => getVidSrcCC(media) },
-        { getVidSrc: () => getVidSrc(media) },
+
+        // { getVidSrcCC: () => getVidSrcCC(media) },
+        // { getVidSrc: () => getVidSrc(media) },
+
         { getVidrock: () => getVidRock(media) },
-        { getMultiembed: () => getMultiembed(media) },
+
+        // { getMultiembed: () => getMultiembed(media) },
         // This seems to be intermittent i will need to look into it more. i have a hunch its rate limited.
-        { getCinemaOS: () => getCinemaOS(media) },
+        // { getCinemaOS: () => getCinemaOS(media) },
 
         // #### NOTE from Inside4ndroid : i have not looked at anything below this line yet!
 
@@ -66,6 +52,7 @@ export async function scrapeMedia(media) {
 
         // Need to Fix which can be fixed
         // { getVidsrcWtf: () => getVidsrcWtf(media) },
+
         // SUB SEARCH
         { getWyzie: () => getWyzie(media) },
         { getLibre: () => getLibre(media) }
@@ -73,16 +60,20 @@ export async function scrapeMedia(media) {
 
     const results = await Promise.all(
         providers.map(async (provider) => {
+
             const providerName = Object.keys(provider)[0];
 
             try {
+
                 return {
                     data: await provider[providerName](),
                     provider: providerName
                 };
+
             } catch (e) {
                 return { data: null, provider: providerName };
-            }
+            };
+
         })
     );
 
@@ -101,7 +92,8 @@ export async function scrapeMedia(media) {
                 typeof file.file === 'string' &&
                 file.file.includes('https://') &&
                 self.findIndex((f) => f.file === file.file) === index
-        );
+        )
+        .map((data) => ({ ...data, id: crypto.randomUUID() }));
 
     const subtitles = results
         .filter(
@@ -112,13 +104,17 @@ export async function scrapeMedia(media) {
         .filter(
             (sub, index, self) =>
                 sub.url && self.findIndex((s) => s.url === sub.url) === index
-        );
+        )
+        .map((data) => ({ ...data, id: crypto.randomUUID() }));
+
     // Here comes the big boy to loook for nothing okay here you go
     // We need finalResult coz you can't cache what doesn't exist yet - lowkey just consolidating the return logic
     // Build it once, cache it, return it - way cleaner than scattered returns everywhere
 
     let finalResult;
+
     if (shouldDebug) {
+
         results
             .filter(
                 ({ data }) =>
@@ -137,25 +133,20 @@ export async function scrapeMedia(media) {
             .map(({ data }) => data);
 
         finalResult = { files, subtitles, errors };
+
     } else {
         finalResult = { files, subtitles };
-    }
+    };
+
+    console.info(files.length > 0 && !shouldDebug)
 
     // Only cache if we actually found some streams and we're not bypassing cache
-    if (files.length > 0 && !shouldDebug) {
-        setToCache(cacheKey, finalResult);
-        if (shouldDebug) {
-            console.log(
-                `[CACHE] Cached result for ${cacheKey}, next request will be much faster`
-            );
-        }
-    } else if (shouldDebug) {
-        console.log(
-            `[CACHE] Not caching result for ${cacheKey} - cache is bypassed for debugging`
-        );
-    }
+    // if (files.length > 0 && !shouldDebug) {
+    //     await setToCache(cacheKey, finalResult);
+    // };
 
     return finalResult;
-}
+
+};
 
 export default { scrapeMedia };

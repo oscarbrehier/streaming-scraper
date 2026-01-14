@@ -3,9 +3,7 @@ import express from 'express';
 import { strings } from './strings.js';
 import { handleErrorResponse } from './helpers/helper.js';
 import { ErrorObject } from './helpers/ErrorObject.js';
-import { getCacheStats } from './cache/cache.js';
 import { startup } from './utils/startup.js';
-import { authMiddleware } from "./middleware/auth.js";
 import { createCorsMiddleware } from './middleware/cors.js';
 
 import proxyRoutes from "./routes/proxy.js";
@@ -32,16 +30,6 @@ app.get('/', (req, res) => {
         information: strings.INFORMATION,
         license: strings.LICENSE,
         source: strings.SOURCE
-    });
-});
-
-app.get('/cache-stats', authMiddleware, (req, res) => {
-    const stats = getCacheStats();
-
-    res.status(200).json({
-        ...stats,
-        cacheEnabled: true,
-        ttl: '3 hours (10800 seconds)'
     });
 });
 

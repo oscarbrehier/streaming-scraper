@@ -7,7 +7,7 @@
     },
     "type": "module",
     "scripts": {
-        "dev": "bun --watch ./src/index.js --debug",
+        "dev": "bun --watch ./src --debug",
         "main": "bun --watch ./src/index.js",
         "deploy": "bun --watch ./src/index.js",
         "start": "bun --watch ./src/index.js",
