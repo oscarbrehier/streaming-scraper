@@ -4,6 +4,7 @@ export const createCorsMiddleware = (allowedOrigins) => {
 
 	return cors({
 		origin: (origin, callback) => {
+
 			if (
 				!origin ||
 				allowedOrigins.some((o) => origin.includes(o)) ||
